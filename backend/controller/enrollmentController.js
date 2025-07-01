@@ -133,60 +133,107 @@ const getAllEnrollments = async (req, res) => {
     }
 };
 
-// Get enrollments by student (Student can see their own enrollments)
+// const getStudentEnrollments = async (req, res) => {
+//   try {
+//     // Since isStudent middleware ensures only students can access this route,
+//     // we can directly use req.user.id as the studentId
+//     const studentId = req.user.id;
+
+//     const enrollments = await Enrollment.findAll({
+//       where: { studentId: studentId },
+//       include: [
+//         {
+//           model: Course,
+//           as: "course",
+//           where: { isActive: true },
+//           attributes: [
+//             "id",
+//             "title",
+//             "code",
+//             "credit",
+//             "semester",
+//             "description",
+//           ],
+//           include: [
+//             {
+//               model: User,
+//               as: "faculty",
+//               attributes: ["id", "username", "email"],
+//             },
+//           ],
+//         },
+//       ],
+//       order: [["enrolledAt", "DESC"]],
+//     });
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Student enrollments retrieved successfully",
+//       enrollments: enrollments,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "Error fetching student enrollments",
+//       error: error.message,
+//     });
+//   }
+// };
+
+// Get student's own enrollments (Student only)
 const getStudentEnrollments = async (req, res) => {
-    try {
-        const studentId = req.user.role === 'student' ? req.user.id : req.params.studentId;
+  try {
+    const studentId = req.user.id;
 
-        // If admin is requesting specific student's enrollments
-        if (req.user.role === 'admin' && req.params.studentId) {
-            // Verify student exists
-            const student = await User.findOne({
-                where: { 
-                    id: req.params.studentId,
-                    role: 'student'
-                }
-            });
+    const enrollments = await Enrollment.findAll({
+      where: { studentId: studentId },
+      include: [
+        {
+          model: Course,
+          as: "course",
+          where: { isActive: true },
+          attributes: [
+            "title",
+            "description", 
+            "credit",
+            "code",
+            "semester",
+          ],
+          include: [
+            {
+              model: User,
+              as: "faculty",
+              attributes: ["username"],
+            },
+          ],
+        },
+      ],
+      attributes: [], // Don't include enrollment fields
+      order: [["enrolledAt", "DESC"]],
+    });
 
-            if (!student) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Student not found!"
-                });
-            }
-        }
+    // Transform the data to flatten the structure
+    const simplifiedEnrollments = enrollments.map(enrollment => ({
+      title: enrollment.course.title,
+      description: enrollment.course.description,
+      credit: enrollment.course.credit,
+      code: enrollment.course.code,
+      semester: enrollment.course.semester,
+      CreatedBy: enrollment.course.faculty.username,
+    }));
 
-        const enrollments = await Enrollment.findAll({
-            where: { studentId: studentId },
-            include: [
-                {
-                    model: Course,
-                    as: 'course',
-                    where: { isActive: true },
-                    attributes: ['id', 'title', 'code', 'credit', 'semester', 'description'],
-                    include: [{
-                        model: User,
-                        as: 'faculty',
-                        attributes: ['id', 'username', 'email']
-                    }]
-                }
-            ],
-            order: [['createdAt', 'DESC']]
-        });
-
-        return res.status(200).json({
-            success: true,
-            message: "Student enrollments retrieved successfully",
-            enrollments: enrollments
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Error fetching student enrollments",
-            error: error.message
-        });
-    }
+    return res.status(200).json({
+      success: true,
+      message: "Student enrollments retrieved successfully",
+      enrollments: simplifiedEnrollments,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching student enrollments",
+      error: error.message,
+    });
+  }
 };
 
 // Get enrollments by course (Faculty can see their course enrollments)
@@ -228,7 +275,7 @@ const getCourseEnrollments = async (req, res) => {
                     attributes: ['id', 'username', 'email']
                 }
             ],
-            order: [['createdAt', 'DESC']]
+            order: [['enrolledAt', 'DESC']]
         });
 
         return res.status(200).json({

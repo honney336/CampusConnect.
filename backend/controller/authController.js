@@ -110,17 +110,22 @@ const updateUser = async (req, res) => {
             const salt = await bcrypt.genSalt(10); 
             const hashedPassword = await bcrypt.hash(password, salt); 
             const updateuser = await User.update({username: username , email: email, password: hashedPassword}, {where:{id: userId}}); 
-            return res.status(200).json({success:true, message: "User updated!", user:updateuser});
-        }  
 
+             const updatedUser = await User.findByPk(userId, {
+            attributes: ['id', 'username', 'email', 'role']
+        });
+            return res.status(200).json({success:true, message: "User updated!", User: updatedUser });
+        } 
+        
+          
         else {
             return res.status(404).json({success:false , message: "User doesnot Exists"})
         }
     }
     catch (error){
-         return res.status(500).json({success: false , error:error});
+         return res.status(500).json({success: false , message:"Internal Server Error!" , error:error});
     }
-}
+};  
 
 
 //only admin can delete users
