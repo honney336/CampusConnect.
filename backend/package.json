@@ -2,12 +2,11 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.1",
     "node": "^22.16.0",
-    "nodemon": "^3.1.10",
     "sequelize": "^6.37.7"
   },
   "name": "campusconnect",
@@ -21,5 +20,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
 }
