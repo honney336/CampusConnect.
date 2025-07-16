@@ -133,52 +133,6 @@ const getAllEnrollments = async (req, res) => {
     }
 };
 
-// const getStudentEnrollments = async (req, res) => {
-//   try {
-//     // Since isStudent middleware ensures only students can access this route,
-//     // we can directly use req.user.id as the studentId
-//     const studentId = req.user.id;
-
-//     const enrollments = await Enrollment.findAll({
-//       where: { studentId: studentId },
-//       include: [
-//         {
-//           model: Course,
-//           as: "course",
-//           where: { isActive: true },
-//           attributes: [
-//             "id",
-//             "title",
-//             "code",
-//             "credit",
-//             "semester",
-//             "description",
-//           ],
-//           include: [
-//             {
-//               model: User,
-//               as: "faculty",
-//               attributes: ["id", "username", "email"],
-//             },
-//           ],
-//         },
-//       ],
-//       order: [["enrolledAt", "DESC"]],
-//     });
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Student enrollments retrieved successfully",
-//       enrollments: enrollments,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       success: false,
-//       message: "Error fetching student enrollments",
-//       error: error.message,
-//     });
-//   }
-// };
 
 // Get student's own enrollments (Student only)
 const getStudentEnrollments = async (req, res) => {
@@ -186,7 +140,7 @@ const getStudentEnrollments = async (req, res) => {
     const studentId = req.user.id;
 
     await createActivityLog(studentId, 'viewed', 'enrollment', null, `Student viewed their enrollments`, req);
-    
+
     const enrollments = await Enrollment.findAll({
       where: { studentId: studentId },
       include: [

@@ -21,13 +21,6 @@ const createuser = async(req, res) => {
             return res.status(400).json({success: false, message:"Password must be at least 8 characters long"});
         }
 
-        // const emailExist = User.findOne({where:{email:email}})
-        // if (emailExist){
-        //     console.log(email)
-        //     return res.status(404).json({success:false, message: "email already exist"});
-
-        // }
-
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         const newuser = await User.create({
