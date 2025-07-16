@@ -74,7 +74,7 @@ const enrollStudent = async (req, res) => {
                 {
                     model: Course,
                     as: 'course',
-                    attributes: ['id', 'title', 'code', 'credit']
+                    attributes: ['id', 'title', 'code']
                 }
             ]
         });
@@ -115,7 +115,7 @@ const getAllEnrollments = async (req, res) => {
                     }]
                 }
             ],
-            order: [['createdAt', 'DESC']]
+            order: [['enrolledAt', 'DESC']]
         });
 
         return res.status(200).json({
@@ -185,6 +185,8 @@ const getStudentEnrollments = async (req, res) => {
   try {
     const studentId = req.user.id;
 
+    await createActivityLog(studentId, 'viewed', 'enrollment', null, `Student viewed their enrollments`, req);
+    
     const enrollments = await Enrollment.findAll({
       where: { studentId: studentId },
       include: [
@@ -265,6 +267,8 @@ const getCourseEnrollments = async (req, res) => {
                 message: "You don't have permission to view this course's enrollments"
             });
         }
+
+        
 
         const enrollments = await Enrollment.findAll({
             where: { courseId: courseId },

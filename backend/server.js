@@ -21,7 +21,10 @@ app.use('/api/auth', require("./route/authRoute"));
 app.use('/api/user', require("./route/loginRoute")); 
 app.use('/api/user', require("./route/userRoute"));
 app.use('/api/course', require("./route/courseRoute"));
-app.use('/api/enrollment', require("./route/enrollemtRoute"));
+app.use('/api/enrollment', require("./route/enrollmentRoute"));
+app.use('/api/announcement', require("./route/announcementRoute"));
+app.use('/api/event/', require("./route/eventRoute"));
+app.use('/api/activity-log', require("./route/activitylogRoute"))
 
 
 const startServer = async () => {
@@ -34,5 +37,8 @@ const startServer = async () => {
 };
 
 startServer();
+
+
+
 
 

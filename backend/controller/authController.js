@@ -4,6 +4,7 @@
     require("dotenv").config();
     const bcrypt = require("bcrypt");
     const jwt = require("jsonwebtoken");
+    const {createActivityLog} = require('./activitylogController')
 
 
 //only admin can create new user
@@ -15,6 +16,9 @@ const createuser = async(req, res) => {
         if (!username || !email || !password || !role) {
             return res.status(400).json({success: false, message: "Please enter all the fields!"});
 
+        }
+        if(password.length< 8){
+            return res.status(400).json({success: false, message:"Password must be at least 8 characters long"});
         }
 
         // const emailExist = User.findOne({where:{email:email}})
@@ -56,6 +60,7 @@ const login = async ( req, res)=> {
         
         const isMatch = await bcrypt.compare(password, user.password);
         if(!isMatch) {
+            await createActivityLog(user.id, 'login_failed', 'user', user.id, `Failed login attempt`, req);
             return res.status(401).json({success: false, message: "Invalid credentials"})
 
         }
@@ -67,8 +72,10 @@ const login = async ( req, res)=> {
 
         );
 
+        await createActivityLog(user.id, 'login', 'user', user.id, `User logged in successfully`, req);
+
         return res.status(200).json({
-            success: true, message: "Login successful", token, user: {
+                success: true, message: "Login successful", token, user: {
                 id: user.id, 
                 username: user.username, 
                 email: user.email, 

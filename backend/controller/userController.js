@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../model/usermodel"); 
+const {createActivityLog} = require("./activitylogController")
 
 
 // Login user can change their password
@@ -33,6 +34,8 @@ const changePassword = async (req, res) => {
         console.log("checked!")
         user.password = hashedPassword; 
         await user.save(); 
+
+        await createActivityLog(userId, 'password_changed', 'user', userId, `User changed password`, req);
 
        return  res.status(200).json({success: true, message: "Password changed successfully."}); 
 

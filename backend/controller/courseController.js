@@ -1,4 +1,5 @@
     const {Course, User, Enrollment} = require("../model"); // Assuming you have models defined for Course, User, and Enrollment
+    const {createActivityLog}=require("./activitylogController")
     // Faculty can create new course
     const createCourse = async (req, res) => {
         console.log(req.body);
@@ -31,7 +32,7 @@
                 semester,
                 facultyId
             });
-
+            await createActivityLog(facultyId, 'created', 'course', newCourse.id, `Created course: ${title} (${code})`, req);
             return res.status(201).json({
                 success: true,
                 message: "Course created successfully!",
@@ -205,7 +206,7 @@ const updateCourse = async (req, res) => {
             credit: credit || course.credit,
             semester: semester || course.semester
         });
-
+        await createActivityLog(facultyId, 'updated', 'course', courseId, `Updated course: ${course.title}`, req);
         return res.status(200).json({
             success: true,
             message: "Course updated successfully",
