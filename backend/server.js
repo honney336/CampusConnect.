@@ -24,7 +24,8 @@ app.use('/api/course', require("./route/courseRoute"));
 app.use('/api/enrollment', require("./route/enrollmentRoute"));
 app.use('/api/announcement', require("./route/announcementRoute"));
 app.use('/api/event/', require("./route/eventRoute"));
-app.use('/api/activity-log', require("./route/activitylogRoute"))
+app.use('/api/activity-log', require("./route/activitylogRoute"));
+app.use('/api/notes', require("./route/notesRoute"));
 
 
 const startServer = async () => {
