@@ -165,16 +165,15 @@ export default App;
   import Homepage from './Pages/Homepage'
   import Login from './Pages/Login'
   import Register from './Pages/Register'
-  import Product from './Pages/Product'
   import Student from './Pages/Student'
   import Faculty from './Pages/Faculty'
   import Admin from './Pages/Admin'
-  import Announcements from './Pages/Announcements'
-  import Courses from './Pages/Courses'
+  import Announcements from './Pages/Announcement/Announcements'
+  import Courses from './Pages/Course/Courses'
   import Events from './Pages/Events'
   import Enrollments from './Pages/Enrollments'
   import Notes from './Pages/Notes'
-  import CreateAnnouncement from './Pages/CreateAnnouncement'
+  import CreateAnnouncement from './Pages/Announcement/CreateAnnouncement'
   function App() {
 
      const user = JSON.parse(localStorage.getItem("user") || '{}');

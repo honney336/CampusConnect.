@@ -25,12 +25,13 @@ function Login() {
         toast.success(response?.data?.message || "Login successful");
 
         const decoded = jwtDecode(token);
-        const {role,email} = decoded;
+        const {role,email,username} = decoded;
         localStorage.setItem('user', JSON.stringify ({
-          name:email, 
-          role
+          name:username, 
+          role,
+          email
         }));
-        // console.log("Saved user to localStorage:", JSON.parse(localStorage.getItem("user")));   
+        console.log("Saved user to localStorage:", JSON.parse(localStorage.getItem("user")));   
 
         setTimeout(() => {
           if (role === "admin") window.location.href = "/admindashboard";

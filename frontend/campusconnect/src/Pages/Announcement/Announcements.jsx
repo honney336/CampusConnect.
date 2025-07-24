@@ -341,12 +341,14 @@
 
 
 import React, { useEffect, useState } from "react";
-import { getAllAnnouncements } from "../API/API";
+import { getAllAnnouncements } from "../../API/API";
 import { FaUser, FaBook, FaCalendarAlt, FaBullhorn, FaSearch, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 // Example: get user role from localStorage or context
-const userRole = localStorage.getItem("role"); // "admin", "faculty", "student", etc.
+const token = localStorage.getItem("user"); 
+const parseTOKEN= JSON.parse(token);
+const userRole=parseTOKEN.role
 
 const PRIORITY_COLORS = {
   High: "bg-red-100 text-red-700 border-red-400",

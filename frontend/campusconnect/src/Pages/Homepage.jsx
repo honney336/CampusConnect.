@@ -112,6 +112,7 @@ const Homepage = () => {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold">Welcome back, {user.name}!</h2>
+              
               <p className="mt-2">You have {assignments.filter(a => a.status !== 'Completed').length} pending tasks</p>
             </div>
             <FaChartLine className="h-12 w-12 opacity-70" />

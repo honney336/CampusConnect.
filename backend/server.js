@@ -3,6 +3,7 @@ const { connectDB, sequelize } = require("./db/database");
 const cors= require("cors");
 require("dotenv").config();
 
+
 const app = express();
 app.use(express.json());
 
