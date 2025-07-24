@@ -15,7 +15,7 @@ const authGuard = require("../middleware/authGuard");
 const isFacultyorAdmin = require("../middleware/isFacutlyorAdmin");
 
 // Routes for ALL authenticated users (Students, Faculty, Admin can see all announcements)
-router.get("/all", authGuard, getAllAnnouncements);                    // Get all announcements
+router.get("/all", getAllAnnouncements);                    // Get all announcements
 router.get("/course/:courseId", authGuard, getCourseAnnouncements);    // Get announcements by course
 router.get("/:id", authGuard, getAnnouncementById);               // Get single announcement
 

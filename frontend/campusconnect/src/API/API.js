@@ -16,6 +16,12 @@ const Api = axios.create({
 });
 
 
+const config = {
+  headers: {
+    'authorization': `Bearer ${localStorage.getItem("token")}`
+  }
+}
+
 
 
 
@@ -23,5 +29,19 @@ const Api = axios.create({
 export const createuser = (data) => Api.post('/api/auth/register', data);
 
 export  const login = (data) => Api.post('/api/user/login', data);
+
+export const getAllAnnouncements = () => Api.get('/api/announcement/all')
+
+export const createAnnouncement =(data) => Api.post('/api/announcement/create' , data, config); 
+
+export const changePassword = (data) => Api.post('/api/user/change-password', data, config);
+// export const createAnnouncement = (data) => {
+//   const token = localStorage.getItem("token");
+//   return Api.post('/api/announcement/create', data, {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
+// };
 
 

@@ -1,101 +1,12 @@
-// import { useState } from "react";
-// import toast from "react-hot-toast";
-// import { loginUsers } from "../API/API";
-// import jwtDecode from "jwt-decode";
-
-// function Login() {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-
-//   const submit = async (e) => {
-//     if (!email || !password) {
-//       return toast.error("Both email and password are required");
-//     }
-
-//     try {
-//       const data = {
-//         email,
-//         password,
-//       };
-
-//       const response = await loginUsers(data);
-
-//       if (response?.data?.success) {
-//         localStorage.setItem("token", response?.data?.token);
-//         toast.success(response?.data?.message);
-//         const decode = jwtDecode(response?.data?.token);
-//         // if (decode?.role === "admin") {
-//         //   setTimeout(() => {
-//         //     return window.location.href = "/homepage";
-            
-//         // }, 1000);
-// ;
-//         return 
-//       } 
-      
-//       else {
-//         return toast.error(response?.data?.message || "Login failed");
-//       }
-//     } catch (error) {
-//       console.error("Login error:", error);
-//       toast.error(error?.response?.data?.message || "Something went wrong");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <form className="mt-10">
-//         <input
-//           type="text"
-//           name="email"
-//           value={email}
-//           className="border border-amber-30 m-2 p-2"
-//           onChange={(e) => setEmail(e.target.value)}
-//           placeholder="email"
-//         />
-//         <input
-//           type="password"
-//           name="password"
-//           value={password}
-//           className="border border-amber-30 m-2 p-2"
-//           onChange={(e) => setPassword(e.target.value)}
-//           placeholder="password"
-//         />
-//       </form>
-
-//       <button onClick={submit} className="bg-blue-500 text-white rounded-sm p-3 ml-75">
-//         Login
-//       </button>
-//       <p>Live preview</p>
-//       <p>{email}</p>
-//       <p>{password}</p>
-//     </div>
-//   );
-// }
-
-// export default Login;
-
-
-
-// import React from 'react'
-
-// const Login = () => {
-//   return (
-//     <div>Login</div>
-//   )
-// }
-
-// export default Login;
-
-
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { login } from "../API/API"; // Assumes this sends POST request to backend
-// import jwtDecode from "jwt-decode";
+import { login } from "../API/API.js";
+import { jwtDecode } from "jwt-decode";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -104,48 +15,124 @@ function Login() {
       return toast.error("Both email and password are required");
     }
 
+    setLoading(true);
     try {
-      const data = { email, password };
-      const response = await login(data);
-      return toast.success(response?.data?.message || "Login successful");
-    }
-    catch (error) {
+      const response = await login({ email, password });
+
+      if (response?.data?.success) {
+        const token = response?.data?.token;
+        localStorage.setItem("token", token);
+        toast.success(response?.data?.message || "Login successful");
+
+        const decoded = jwtDecode(token);
+        const {role,email} = decoded;
+        localStorage.setItem('user', JSON.stringify ({
+          name:email, 
+          role
+        }));
+        // console.log("Saved user to localStorage:", JSON.parse(localStorage.getItem("user")));   
+
+        setTimeout(() => {
+          if (role === "admin") window.location.href = "/admindashboard";
+          else if (role === "faculty") window.location.href = "/facultydashboard";
+          else if (role === "student") window.location.href = "/studentdashboard";
+          else toast.error("Invalid role");
+        }, 1000);
+      } else {
+        toast.error(response?.data?.message || "Login failed");
+      }
+    } catch (error) {
       console.error("Login error:", error);
       toast.error(error?.response?.data?.message || "Something went wrong");
     }
-
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={submit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="mx-auto h-20 w-20  flex items-center justify-center">
+            <img
+            src="../public/logo.png"
+            alt="logo"
+            className="h-20 w-20 object-contain"
+            />
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+            Login
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Sign in to access the dashboard
+          </p>
 
-        <label className="block mb-2 text-gray-700">Email</label>
-        <input
-          type="email"
-          className="w-full p-2 mb-4 border border-gray-300 rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+          <form className="mt-8 space-y-6" onSubmit={submit}>
+            {/* No separate error box, use toast for errors */}
 
-        <label className="block mb-2 text-gray-700">Password</label>
-        <input
-          type="password"
-          className="w-full p-2 mb-6 border border-gray-300 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 sm:text-sm transition-all duration-200"
+                  placeholder="Enter your email"
+                />
+              </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-        >
-          Login
-        </button>
-      </form>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 sm:text-sm transition-all duration-200"
+                  placeholder="Password"
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
+              >
+                {loading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+            </div>
+
+            {/* No registration link or sign-up option */}
+
+            <div className="text-center">
+              <p className="text-xs text-gray-500">
+                Use your credentials to access the dashboard
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -156,3 +157,54 @@ function App() {
 }
 
 export default App;
+=======
+  import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+  import './App.css'
+  import Navbar from './Pages/Component/Navbar'
+  import { Toaster } from 'react-hot-toast'
+  import Homepage from './Pages/Homepage'
+  import Login from './Pages/Login'
+  import Register from './Pages/Register'
+  import Product from './Pages/Product'
+  import Student from './Pages/Student'
+  import Faculty from './Pages/Faculty'
+  import Admin from './Pages/Admin'
+  import Announcements from './Pages/Announcements'
+  import Courses from './Pages/Courses'
+  import Events from './Pages/Events'
+  import Enrollments from './Pages/Enrollments'
+  import Notes from './Pages/Notes'
+  import CreateAnnouncement from './Pages/CreateAnnouncement'
+  function App() {
+
+     const user = JSON.parse(localStorage.getItem("user") || '{}');
+  const userRole = user.role || null;
+    return (
+    <Router>
+      <Toaster/>
+      <Navbar/>
+      <div className="pt-0.5 px-0"></div>
+      <Routes>
+        <Route path='/' element={<Homepage/>} />
+        <Route path='/announcements' element={<Announcements/>} />
+        <Route path='/events' element={<Events/>} />
+        <Route path='/courses' element={<Courses/>} />
+        <Route path='/notes' element={<Notes/>} />
+        <Route path='/enrollments' element={<Enrollments/>} />
+        <Route path='/createannouncement' element={<CreateAnnouncement userRole={userRole}/>} />
+
+        <Route path='/login' element={<Login/>} />
+        <Route path='/register' element={<Register/>} />
+        {/* <Route path='/dashboard' element={<Dashboard/>} />
+        <Route path='/profile' element={<Profile/>} /> */}
+        <Route path='/admindashboard' element={<Admin/>} />
+        <Route path='/studentdashboard' element={<Student/>} />
+        <Route path='/facultydashboard' element={<Faculty/>} />
+
+      </Routes>
+    </Router>
+    )
+  }
+
+  export default App
+>>>>>>> 2ed16ca ([+] MODIFIED ALL)
