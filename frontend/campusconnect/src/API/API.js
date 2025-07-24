@@ -30,8 +30,17 @@ export const createuser = (data) => Api.post('/api/auth/register', data);
 
 export  const login = (data) => Api.post('/api/user/login', data);
 
-export const getAllAnnouncements = () => Api.get('/api/announcement/all')
-export const getAnnouncementById = (id) => Api.get(`/api/announcement/${id}`, config);
+export const getAllAnnouncements = () => Api.get('/api/announcement/all', config);
+
+export const getAnnouncementById = (id) => {
+  if (!id || isNaN(id)) { // Check for valid numeric ID
+    console.error('Invalid announcement ID:', id);
+    throw new Error('Valid announcement ID is required');
+  }
+  return Api.get(`/api/announcement/${id}`, config);
+};
+
+
 
 export const createAnnouncement =(data) => Api.post('/api/announcement/create' , data, config); 
 
