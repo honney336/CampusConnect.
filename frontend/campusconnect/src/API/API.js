@@ -24,12 +24,17 @@ const config = {
 
 
 
-
+//Auth api
 
 export const createuser = (data) => Api.post('/api/auth/register', data);
 
 export  const login = (data) => Api.post('/api/user/login', data);
 
+
+//User api
+export const changePassword = (data) => Api.post('/api/user/change-password', data, config);
+
+//Announcement api
 export const getAllAnnouncements = () => Api.get('/api/announcement/all', config);
 
 export const getAnnouncementById = (id) => {
@@ -44,15 +49,7 @@ export const getAnnouncementById = (id) => {
 
 export const createAnnouncement =(data) => Api.post('/api/announcement/create' , data, config); 
 
-export const changePassword = (data) => Api.post('/api/user/change-password', data, config);
+
 // export const updateAnnouncement = (id) => Api.put('/api/announcement/update/`{id}`')
-// export const createAnnouncement = (data) => {
-//   const token = localStorage.getItem("token");
-//   return Api.post('/api/announcement/create', data, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-// };
 
 
