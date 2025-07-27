@@ -35,34 +35,79 @@ const Announcements = () => {
   const [search, setSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
+  const [retrying, setRetrying] = useState(false);
   const navigate = useNavigate();
 
   // Fetch announcements
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
+      setError("No authentication token found");
       navigate("/login");
       return;
     }
 
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
+        // Add request debugging
+        console.log("Fetching announcements with token:", token);
+        
         const res = await getAllAnnouncements();
-        const data = res?.data?.announcements;
-        if (res?.data?.success && Array.isArray(data)) {
-          setAnnouncements(data);
-        } else {
-          setError("Failed to load announcements");
+        console.log("API Response:", res); // Debug response
+
+        // Validate response structure
+        if (!res) {
+          throw new Error("No response from server");
         }
+
+        if (res.status === 500) {
+          throw new Error("Internal server error. Please try again later.");
+        }
+
+        if (!res.data) {
+          throw new Error("Invalid response format");
+        }
+
+        const { success, announcements: data, message } = res.data;
+
+        if (!success) {
+          throw new Error(message || "Failed to load announcements");
+        }
+
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid announcements data format");
+        }
+
+        setAnnouncements(data);
+        setFiltered(data);
+
       } catch (err) {
-        setError("Error fetching announcements");
+        console.error("Detailed error:", {
+          message: err.message,
+          response: err.response,
+          stack: err.stack
+        });
+        
+        // Handle specific error cases
+        if (err.response?.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login");
+          return;
+        }
+
+        setError(err.response?.data?.message || err.message || "Failed to fetch announcements");
+        setAnnouncements([]);
       } finally {
         setLoading(false);
+        setRetrying(false);
       }
     };
 
     fetchData();
-  }, [navigate]);
+  }, [navigate, retrying]);
 
   // Unique course filter options
   const courses = useMemo(() => {
@@ -113,7 +158,8 @@ const Announcements = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
         <div className="text-lg text-gray-600">Loading announcements...</div>
       </div>
     );
@@ -121,8 +167,14 @@ const Announcements = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg text-red-600">{error}</div>
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-50">
+        <div className="text-lg text-red-600 mb-4">{error}</div>
+        <button
+          onClick={() => setRetrying(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

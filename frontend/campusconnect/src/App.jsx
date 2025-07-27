@@ -10,11 +10,15 @@ import Faculty from './Pages/Faculty'
 import Admin from './Pages/Admin'
 import Announcements from './Pages/Announcement/Announcements'
 import Courses from './Pages/Course/Courses'
-import Events from './Pages/Events'
+import Events from './Pages/Events/Events'
 import Enrollments from './Pages/Enrollments'
 import Notes from './Pages/Notes'
 import CreateAnnouncement from './Pages/Announcement/CreateAnnouncement'
 import AnnouncementDetail from './Pages/Announcement/AnnouncementDetails';
+import CreateEvent from './Pages/Events/CreateEvent';
+import UpdateEvent from './Pages/Events/UpdateEvent';
+import CreateCourse from './Pages/Course/CreateCourse';
+import UpdateCourse from './Pages/Course/UpdateCourse';
 
 function App() {
 
@@ -34,6 +38,10 @@ function App() {
         <Route path='/enrollments' element={<Enrollments/>} />
         <Route path='/createannouncement' element={<CreateAnnouncement userRole={userRole}/>} />
         <Route path="/announcement/:id" element={<AnnouncementDetail />} />
+        <Route path='/create-event' element={<CreateEvent/>} />
+        <Route path='/update-event/:id' element={<UpdateEvent/>} />
+        <Route path="/create-course" element={<CreateCourse />} />
+        <Route path="/update-course/:id" element={<UpdateCourse />} />
 
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />

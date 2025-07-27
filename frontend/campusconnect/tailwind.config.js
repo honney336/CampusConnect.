@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllAnnouncements } from '../API/API';
 
 const Homepage = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({ name: '', role: '' });
   const [announcements, setAnnouncements] = useState([]);
   const [courses, setCourses] = useState([]);
   const [assignments, setAssignments] = useState([]);
@@ -13,24 +13,24 @@ const Homepage = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (!token || !userData) {
-      navigate('/login');
-      return;
-    }
+  const userData = localStorage.getItem('user');
+  console.log(token)
+  console.log(userData)
 
-    try {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      console.log('Current user:', parsedUser); // Debug log
-    } catch (e) {
-      console.error('Error parsing user data:', e);
-      navigate('/login');
-    }
-  }, [navigate]);
+  if (!token || !userData) {
+    navigate('/login');
+    return;
+  }
 
-  useEffect(() => {
+  try {
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser); // contains both name and role
+  } catch (e) {
+    console.error('Invalid user data', e);
+    navigate('/login');
+    return;
+  }
+
     const fetchData = async () => {
       try {
         const response = await getAllAnnouncements();
@@ -59,22 +59,6 @@ const Homepage = () => {
 
     fetchData();
   }, [navigate]);
-
-  // Helper function for permission checks
-  const hasPermission = (action) => {
-    if (!user) return false;
-    
-    switch (action) {
-      case 'create':
-        return ['admin', 'faculty'].includes(user.role);
-      case 'edit':
-        return ['admin', 'faculty'].includes(user.role);
-      case 'delete':
-        return ['admin', 'faculty'].includes(user.role);
-      default:
-        return false;
-    }
-  };
 
   if (loading) {
     return (
@@ -127,7 +111,7 @@ const Homepage = () => {
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white mb-8 shadow-lg">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Welcome back, {user?.name}!</h2>
+              <h2 className="text-2xl font-bold">Welcome back, {user.name}!</h2>
               
               <p className="mt-2">You have {assignments.filter(a => a.status !== 'Completed').length} pending tasks</p>
             </div>
@@ -139,7 +123,7 @@ const Homepage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Announcements */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 overflow-hidden">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold flex items-center">
                   <FaBullhorn className="text-blue-500 mr-2" /> Announcements
@@ -156,13 +140,11 @@ const Homepage = () => {
                   <p className="text-sm text-gray-500">No announcements found.</p>
                 ) : (
                   announcements.map((item) => (
-                    <div key={item.id} className="border-l-4 border-blue-400 pl-4 py-2 hover:bg-gray-50 rounded transition overflow-hidden">
-                      <h3 className="font-semibold text-lg truncate">{item.title}</h3>
-                      <p className="text-gray-600 text-sm mt-1 line-clamp-2 overflow-hidden">
-                        {item.content}
-                      </p>
+                    <div key={item.id} className="border-l-4 border-blue-400 pl-4 py-2 hover:bg-gray-50 rounded transition">
+                      <h3 className="font-semibold text-lg truncate line-clamp-2">{item.title}</h3>
+                      <p className="text-gray-600 text-sm mt-1 line-clamp-2">{item.content}</p>
                       <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
-                        <span className="truncate max-w-[150px]">Posted by {item.creator?.username || 'Unknown'}</span>
+                        <span className="max-w-[150px] truncate">Posted by {item.creator?.username || 'Unknown'}</span>
                         <span>{new Date(item.created_At).toLocaleDateString()}</span>
                       </div>
                     </div>
@@ -242,26 +224,6 @@ const Homepage = () => {
             </div>
           </div>
         </div>
-
-        {/* Show content based on permissions */}
-        {hasPermission('create') && (
-          <div className="flex space-x-4 mb-8">
-            <button
-              onClick={() => navigate('/create-announcement')}
-              className="btn-primary"
-            >
-              Create Announcement
-            </button>
-            <button
-              onClick={() => navigate('/create-event')}
-              className="btn-primary"
-            >
-              Create Event
-            </button>
-          </div>
-        )}
-
-        {/* Rest of your homepage content... */}
       </main>
     </div>
   );
