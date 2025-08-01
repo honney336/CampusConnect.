@@ -23,4 +23,4 @@ router.get("/my-notes", authGuard, isFacultyorAdmin, getMyNotes);               
 router.put("/update/:id", authGuard, isFacultyorAdmin, updateNotes);                      // Update notes
 router.delete("/delete/:id", authGuard, isFacultyorAdmin, deleteNotes);                   // Delete notes
 
-module.exports = router;
+module.exports = router;    

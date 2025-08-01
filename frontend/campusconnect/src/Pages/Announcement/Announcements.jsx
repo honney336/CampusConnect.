@@ -156,6 +156,27 @@ const Announcements = () => {
     navigate(`/announcement/${announcementId}`);
   };
 
+  const getTypeColor = (type) => {
+    const colors = {
+      general: 'bg-gray-100 text-gray-800',
+      academic: 'bg-blue-100 text-blue-800',
+      exam: 'bg-red-100 text-red-800',
+      assignment: 'bg-green-100 text-green-800',
+      event: 'bg-yellow-100 text-yellow-800',
+      urgent: 'bg-purple-100 text-purple-800'
+    };
+    return colors[type] || colors.general;
+  };
+
+  const getAnnouncementTypeColor = (type) => {
+    const colors = {
+      High: 'bg-rose-100 text-rose-800 hover:bg-rose-200',
+      Medium: 'bg-amber-100 text-amber-800 hover:bg-amber-200',
+      Low: 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+    };
+    return colors[type] || 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gray-50">
@@ -224,7 +245,7 @@ const Announcements = () => {
             >
               <option value="All">All Courses</option>
               {courses.map((course, i) => (
-                <option key={`course-${i}`} value={course}>{course}</option>
+                <option key={`course-${course}-${i}`} value={course}>{course}</option>
               ))}
             </select>
           </div>
@@ -234,7 +255,7 @@ const Announcements = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((announcement) => (
             <div
-              key={announcement.id}
+              key={`announcement-${announcement.id}`}
               className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col"
             >
               {/* Card Header */}

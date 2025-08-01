@@ -1,53 +1,57 @@
 import React, { useState } from "react";
 import { createAnnouncement } from "../../API/API";
 import { useNavigate } from "react-router-dom";
-import { FaExclamationCircle } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
+import toast from "react-hot-toast";
 
-const PRIORITY_OPTIONS = ["LOW", "MEDIUM", "HIGH"];
-
-const CreateAnnouncement = ({ userRole, onSuccess }) => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [announcementType, setAnnouncementType] = useState("general");
-  const [courseId, setCourseId] = useState("");
-  const [priority, setPriority] = useState("LOW");
+const CreateAnnouncement = () => {
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    announcementType: "general",
+    courseCode: "",
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-    // Only admin and faculty can see this form
-  // if (userRole !== "admin" && userRole !== "faculty") return null;
+
+  const announcementTypes = [
+    "general",
+    "academic",
+    "exam",
+    "assignment",
+    "event",
+    "urgent",
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!title.trim() || !content.trim()) {
+    if (!formData.title.trim() || !formData.content.trim()) {
       setError("Title and content are required.");
       return;
     }
 
     setLoading(true);
     try {
-      const payload = {
-        title,
-        content,
-        announcementType,
-        courseId: courseId || null,
-        priority,
-      };
-
-      const response = await createAnnouncement(payload);
+      const response = await createAnnouncement({
+        title: formData.title,
+        content: formData.content,
+        announcementType: formData.announcementType,
+        courseCode: formData.courseCode || null, // Backend will handle course code conversion
+      });
 
       if (response.data.success) {
-        alert("Announcement created successfully!");
-        setTitle("");
-        setContent("");
-        setAnnouncementType("general");
-        setCourseId("");
-        setPriority("LOW");
-        
-        if (onSuccess) onSuccess(); // callback to refresh list or redirect
-        navigate('/announcements')
+        toast.success("Announcement created successfully");
+        setFormData({
+          title: "",
+          content: "",
+          announcementType: "general",
+          courseCode: "",
+        });
+
+        navigate("/announcements");
       } else {
         setError(response.data.message || "Failed to create announcement.");
       }
@@ -59,104 +63,114 @@ const CreateAnnouncement = ({ userRole, onSuccess }) => {
   };
 
   return (
-    <div className=" pt-16 max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
-      <h2 className="text-xl font-semibold mb-4">Create New Announcement</h2>
-
-      {error && (
-        <div className="mb-4 text-red-600 font-medium">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-
-        <label className="block mb-2 font-medium">Title</label>
-        <input
-          type="text"
-          className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter announcement title"
-          disabled={loading}
-          required
-        />
-
-        <label className="block mb-2 font-medium">Content</label>
-        <textarea
-          className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          rows="5"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Enter announcement content"
-          disabled={loading}
-          required
-        />
-
-        <label className="block mb-2 font-medium">Type</label>
-       <select
-  className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-  value={announcementType}
-  onChange={(e) => setAnnouncementType(e.target.value)}
-  disabled={loading}
->
-  <option value="general">General</option>
-  <option value="academic">Academic</option>
-  <option value="exam">Exam</option>
-  <option value="assignment">Assignment</option>
-  <option value="event">Event</option>
-  <option value="urgent">Urgent</option>
-</select>
-
-        <label className="block mb-2 font-medium">Course ID (optional)</label>
-        <input
-          type="text"
-          className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={courseId}
-          onChange={(e) => setCourseId(e.target.value)}
-          placeholder="Enter course ID if applicable"
-          disabled={loading}
-        />
-
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Priority Level
-            <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <select
-              name="priority"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              disabled={loading}
-              required
-            >
-              {PRIORITY_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <FaExclamationCircle className={`h-5 w-5 ${
-                priority === "HIGH" ? "text-red-500" :
-                priority === "MEDIUM" ? "text-yellow-500" :
-                "text-green-500"
-              }`} />
-            </div>
-          </div>
-        </div>
-
+    <div className="min-h-screen bg-gray-50 pt-16">
+      <div className="max-w-3xl mx-auto px-4 py-8">
         <button
-          type="submit"
-          className={`w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition ${
-            loading ? "opacity-70 cursor-not-allowed" : ""
-          }`}
-          disabled={loading}
+          onClick={() => navigate("/announcements")}
+          className="mb-6 flex items-center text-blue-600 hover:text-blue-800"
         >
-          {loading ? "Creating..." : "Create Announcement"}
+          <FaArrowLeft className="mr-2" /> Back to Announcements
         </button>
-      </form>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-semibold mb-6">Create Announcement</h2>
+
+          {error && (
+            <div className="mb-4 text-red-600 font-medium">{error}</div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Title
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Content
+              </label>
+              <textarea
+                required
+                rows="6"
+                value={formData.content}
+                onChange={(e) =>
+                  setFormData({ ...formData, content: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Announcement Type
+              </label>
+              <select
+                value={formData.announcementType}
+                onChange={(e) =>
+                  setFormData({ ...formData, announcementType: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                required
+              >
+                {announcementTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Course Code (Optional)
+              </label>
+              <input
+                type="text"
+                value={formData.courseCode}
+                onChange={(e) =>
+                  setFormData({ ...formData, courseCode: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                placeholder="e.g. CS101"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                Leave blank for general announcements
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => navigate("/announcements")}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md flex items-center"
+              >
+                {loading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  "Create Announcement"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

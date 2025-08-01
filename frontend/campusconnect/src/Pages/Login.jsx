@@ -2,11 +2,13 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { login } from "../API/API.js";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
@@ -25,19 +27,24 @@ function Login() {
         toast.success(response?.data?.message || "Login successful");
 
         const decoded = jwtDecode(token);
-        const {role,email,username} = decoded;
-        localStorage.setItem('user', JSON.stringify ({
-          name:username, 
-          role,
-          email
-        }));
-        console.log("Saved user to localStorage:", JSON.parse(localStorage.getItem("user")));   
+        const { role, email, username, id } = decoded;
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            id: id,
+            username: username,
+            name: username,
+            role,
+            email,
+          })
+        );
+        console.log("Saved user to localStorage:", JSON.parse(localStorage.getItem("user")));
 
         setTimeout(() => {
-          if (role === "admin") window.location.href = "/admindashboard";
-          else if (role === "faculty") window.location.href = "/facultydashboard";
-          else if (role === "student") window.location.href = "/studentdashboard";
-          else toast.error("Invalid role");
+          if (role === "admin") navigate("/admindashboard");
+          else if (role === "faculty") navigate("/facultydashboard");
+          else if (role === "student") navigate("/studentdashboard");
+          else navigate("/");
         }, 1000);
       } else {
         toast.error(response?.data?.message || "Login failed");
@@ -55,9 +62,9 @@ function Login() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="mx-auto h-20 w-20  flex items-center justify-center">
             <img
-            src="../public/logo.png"
-            alt="logo"
-            className="h-20 w-20 object-contain"
+              src="../public/logo.png"
+              alt="logo"
+              className="h-20 w-20 object-contain"
             />
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">

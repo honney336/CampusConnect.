@@ -44,13 +44,13 @@ const upload = multer({
 // Faculty and Admin can upload notes
 const uploadNotes = async (req, res) => {
     try {
-        const { title, description, courseId, tags } = req.body;
+        const { title, description, courseCode, tags } = req.body;
         const uploadedBy = req.user.id;
 
-        if (!title || !courseId) {
+        if (!title || !courseCode) {
             return res.status(400).json({
                 success: false,
-                message: "Please provide title and course ID!"
+                message: "Please provide title and course code!"
             });
         }
 
@@ -61,10 +61,10 @@ const uploadNotes = async (req, res) => {
             });
         }
 
-        // Check if course exists and is active
+        // Find course by code instead of ID
         const course = await Course.findOne({
             where: { 
-                id: courseId,
+                code: courseCode,
                 isActive: true 
             }
         });
@@ -92,7 +92,7 @@ const uploadNotes = async (req, res) => {
             fileType: path.extname(req.file.originalname).toLowerCase(),
             fileSize: req.file.size,
             uploadedBy,
-            courseId,
+            courseId: course.id, // Use the found course's ID
             tags: tags || null
         });
 
@@ -143,6 +143,7 @@ const uploadNotes = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Upload error:', error);
         return res.status(500).json({
             success: false,
             message: "Error uploading notes",

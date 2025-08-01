@@ -36,7 +36,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
   FaHome, FaBullhorn, FaCalendarAlt, FaBook, FaStickyNote,
-  FaUserGraduate, FaSignInAlt, FaSignOutAlt, FaUserPlus, FaTimes
+  FaUserGraduate, FaSignInAlt, FaSignOutAlt, FaUserPlus, FaTimes,
+  FaUser, FaCog
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -45,34 +46,72 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
     setOpen(false);
   };
 
+  // Get user data with debugging
   const token = localStorage.getItem('token');
-  let decode = null;
-  if (token) {
+  const userData = localStorage.getItem('user');
+  let user = null;
+  
+  if (userData) {
     try {
-      decode = jwtDecode(token);
+      user = JSON.parse(userData);
+      console.log("Parsed user:", user);
+    } catch (err) {
+      console.error("Error parsing user data:", err);
+    }
+  }
+
+  // If no user in localStorage but token exists, try to decode token
+  if (!user && token) {
+    try {
+      const decode = jwtDecode(token);
+      user = {
+        id: decode.id,
+        username: decode.username,
+        name: decode.username,
+        email: decode.email,
+        role: decode.role
+      };
+      console.log("User from token:", user);
+      // Store the decoded user data
+      localStorage.setItem("user", JSON.stringify(user));
     } catch (err) {
       console.error("Invalid token:", err);
     }
   }
-  const role = decode?.role;
+
+  const role = user?.role;
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md px-6" style={{ height: '60px' }}>
       <div className="max-w-7xl mx-auto flex items-center justify-between h-full">
         {/* Logo container */}
         <div className="flex-shrink-0 pl-4">
-          <Link to="/">
+          <button 
+            onClick={() => {
+              if (role === 'admin') {
+                navigate('/admindashboard');
+              } else if (role === 'student') {
+                navigate('/studentdashboard');
+              } else if (role === 'faculty') {
+                navigate('/facultydashboard');
+              } else {
+                navigate('/');
+              }
+            }}
+            className="cursor-pointer"
+          >
             <img
               src="/Campus.png"
               alt="CampusConnect LOGO"
               style={{ width: '80px' }}
-              className="block"
+              className="block hover:opacity-80 transition-opacity"
             />
-          </Link>
+          </button>
         </div>
 
         {/* Nav links centered or right-aligned */}
@@ -85,19 +124,50 @@ const Navbar = () => {
               </Link>
             </>
           ) : (
-            <div className="flex space-x-8 flex-1 justify-center">
-              <Link to="/" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaHome /> Home</Link>
-              <Link to="/announcements" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaBullhorn /> Announcements</Link>
-              <Link to="/events" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaCalendarAlt /> Events</Link>
-              <Link to="/courses" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaBook /> Courses</Link>
-              <Link to="/notes" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaStickyNote /> Notes</Link>
-              <Link to="/enrollments" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaUserGraduate /> Enrollments</Link>
-              <button onClick={handleLogout} className="flex items-center gap-2 text-gray-800 hover:text-red-600">
-                <FaSignOutAlt /> Logout
-              </button>
-              {role === "admin" && (
-                <Link to="/register" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaUserPlus /> Register</Link>
-              )}
+            <div className="flex items-center justify-between flex-1">
+              {/* Navigation Links */}
+              <div className="flex space-x-8 ml-8">
+                <Link to="/" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaHome /> Home</Link>
+                <Link to="/announcements" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaBullhorn /> Announcements</Link>
+                <Link to="/events" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaCalendarAlt /> Events</Link>
+                <Link to="/courses" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaBook /> Courses</Link>
+                <Link to="/notes" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaStickyNote /> Notes</Link>
+                <Link to="/enrollments" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaUserGraduate /> Enrollments</Link>
+              </div>
+              
+              {/* User Info and Actions */}
+              <div className="flex items-center space-x-4">
+                {/* User Info */}
+                <div className="flex items-center space-x-2">
+                  <FaUser className="text-gray-600" />
+                  <span className="text-gray-700 font-medium">
+                    {user ? (user.username || user.name || 'Unknown User') : 'No User'}
+                  </span>
+                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
+                    {user ? user.role : 'No Role'}
+                  </span>
+                </div>
+                
+                {/* Profile Button (only for admin) */}
+                {user?.role === 'admin' && (
+                  <button
+                    onClick={() => navigate('/admin-profile')}
+                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                    title="Admin Profile"
+                  >
+                    <FaCog className="w-5 h-5" />
+                  </button>
+                )}
+                
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  title="Logout"
+                >
+                  <FaSignOutAlt className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -134,12 +204,33 @@ const Navbar = () => {
             </Link>
           ) : (
             <>
+              {/* User Info in Mobile */}
+              {user && (
+                <div className="border-b pb-4 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <FaUser className="text-gray-600" />
+                    <span className="text-gray-700 font-medium">{user.username || user.name || 'Unknown User'}</span>
+                  </div>
+                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded mt-2 inline-block">
+                    {user.role}
+                  </span>
+                </div>
+              )}
+              
               <Link to="/" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaHome /> Home</Link>
               <Link to="/announcements" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaBullhorn /> Announcements</Link>
               <Link to="/events" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaCalendarAlt /> Events</Link>
               <Link to="/courses" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaBook /> Courses</Link>
               <Link to="/notes" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaStickyNote /> Notes</Link>
               <Link to="/enrollments" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaUserGraduate /> Enrollments</Link>
+              
+              {/* Admin Profile in Mobile */}
+              {user?.role === 'admin' && (
+                <Link to="/admin-profile" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}>
+                  <FaCog /> Admin Profile
+                </Link>
+              )}
+              
               <button onClick={handleLogout} className="flex items-center gap-2 text-gray-800 hover:text-red-600">
                 <FaSignOutAlt /> Logout
               </button>

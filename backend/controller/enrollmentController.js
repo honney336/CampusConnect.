@@ -1,22 +1,22 @@
 const { User, Course, Enrollment } = require("../model");
+const { createActivityLog } = require("./activitylogController"); // Add this import
+
 // Admin can enroll student in course
 const enrollStudent = async (req, res) => {
-    console.log(req.body);
-    
     try {
-        const { studentId, courseId } = req.body;
+        const { studentEmail, courseCode } = req.body;
 
-        if (!studentId || !courseId) {
+        if (!studentEmail || !courseCode) {
             return res.status(400).json({
                 success: false,
-                message: "Please provide both student ID and course ID!"
+                message: "Please provide both student email and course code!"
             });
         }
 
-        // Check if student exists and has student role
+        // Find student by email
         const student = await User.findOne({
             where: { 
-                id: studentId,
+                email: studentEmail,
                 role: 'student'
             }
         });
@@ -24,14 +24,14 @@ const enrollStudent = async (req, res) => {
         if (!student) {
             return res.status(404).json({
                 success: false,
-                message: "Student not found!"
+                message: "Student not found with this email!"
             });
         }
 
-        // Check if course exists and is active
+        // Find course by code
         const course = await Course.findOne({
             where: { 
-                id: courseId,
+                code: courseCode,
                 isActive: true 
             }
         });
@@ -46,8 +46,8 @@ const enrollStudent = async (req, res) => {
         // Check if student is already enrolled
         const existingEnrollment = await Enrollment.findOne({
             where: {
-                studentId: studentId,
-                courseId: courseId
+                studentId: student.id,
+                courseId: course.id
             }
         });
 
@@ -59,8 +59,8 @@ const enrollStudent = async (req, res) => {
         }
 
         const newEnrollment = await Enrollment.create({
-            studentId,
-            courseId
+            studentId: student.id,
+            courseId: course.id
         });
 
         // Get enrollment with related data
@@ -86,9 +86,10 @@ const enrollStudent = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Enrollment error:', error);
         return res.status(500).json({
             success: false,
-            message: "Internal server error",
+            message: "Error enrolling student",
             error: error.message
         });
     }
@@ -138,8 +139,16 @@ const getAllEnrollments = async (req, res) => {
 const getStudentEnrollments = async (req, res) => {
   try {
     const studentId = req.user.id;
+    console.log('Fetching enrollments for student:', studentId);
 
-    await createActivityLog(studentId, 'viewed', 'enrollment', null, `Student viewed their enrollments`, req);
+    // First check if student exists
+    const student = await User.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found"
+      });
+    }
 
     const enrollments = await Enrollment.findAll({
       where: { studentId: studentId },
@@ -164,30 +173,40 @@ const getStudentEnrollments = async (req, res) => {
           ],
         },
       ],
-      attributes: [], // Don't include enrollment fields
       order: [["enrolledAt", "DESC"]],
     });
 
-    // Transform the data to flatten the structure
-    const simplifiedEnrollments = enrollments.map(enrollment => ({
-      title: enrollment.course.title,
-      description: enrollment.course.description,
-      credit: enrollment.course.credit,
-      code: enrollment.course.code,
-      semester: enrollment.course.semester,
-      CreatedBy: enrollment.course.faculty.username,
-    }));
+    // Create activity log
+    await createActivityLog(
+      studentId,
+      'viewed',
+      'enrollments',
+      null,
+      'Viewed enrollments',
+      req
+    );
 
     return res.status(200).json({
       success: true,
       message: "Student enrollments retrieved successfully",
-      enrollments: simplifiedEnrollments,
+      enrollments: enrollments.map(enrollment => ({
+        id: enrollment.id,
+        title: enrollment.course.title,
+        description: enrollment.course.description,
+        credit: enrollment.course.credit,
+        code: enrollment.course.code,
+        semester: enrollment.course.semester,
+        faculty: enrollment.course.faculty.username,
+        enrolledAt: enrollment.enrolledAt
+      }))
     });
+
   } catch (error) {
+    console.error('Enrollment error:', error);
     return res.status(500).json({
       success: false,
       message: "Error fetching student enrollments",
-      error: error.message,
+      error: error.message
     });
   }
 };
