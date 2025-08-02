@@ -26,6 +26,7 @@ import AdminDashboard from './Pages/Admin/AdminDashboard'
 import UserManagement from './Pages/Admin/UserManagement'
 import AdminProfile from './Pages/Admin/AdminProfile'
 import StudentDashboard from './Pages/Student/StudentDashboard'
+import UpdateAnnouncement from './Pages/Announcement/UpdateAnnouncement';
 
 const ProtectedRoute = ({ element: Element, allowedRoles }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -125,6 +126,7 @@ function App() {
             allowedRoles={['admin']} 
           />
         } />
+        <Route path="/update-announcement/:id" element={<UpdateAnnouncement />} />
       </Routes>
     </Router>
     )

@@ -6,33 +6,52 @@ import { useNavigate } from 'react-router-dom';
 
 const UploadNote = () => {
   const navigate = useNavigate();
-  const [uploadData, setUploadData] = useState({
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
-    courseId: '',
+    courseCode: '',
     file: null
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleUpload = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!uploadData.file || !uploadData.title) {
-      toast.error('Please provide a title and select a file');
+    
+    if (!formData.title || !formData.courseCode || !formData.file) {
+      toast.error('Please fill all required fields');
       return;
     }
 
+    setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('title', uploadData.title);
-      formData.append('description', uploadData.description);
-      formData.append('courseId', uploadData.courseId);
-      formData.append('file', uploadData.file);
+      const uploadFormData = new FormData();
+      uploadFormData.append('title', formData.title);
+      uploadFormData.append('courseCode', formData.courseCode); // Make sure this matches backend expectation
+      uploadFormData.append('description', formData.description);
+      uploadFormData.append('file', formData.file);
 
-      await uploadNote(formData);
-      toast.success('Note uploaded successfully!');
-      navigate('/notes');
+      console.log('Upload form data:'); // Debug log
+      for (let [key, value] of uploadFormData.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await uploadNote(uploadFormData);
+      
+      if (response.data.success) {
+        toast.success('Note uploaded successfully');
+        setFormData({
+          title: '',
+          description: '',
+          courseCode: '',
+          file: null
+        });
+        navigate('/notes');
+      }
     } catch (error) {
-      console.error('Error uploading note:', error);
-      toast.error('Failed to upload note');
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.message || 'Failed to upload note');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,15 +70,15 @@ const UploadNote = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Upload New Note</h1>
           <p className="text-gray-600 mb-8">Share course materials with students</p>
 
-          <form onSubmit={handleUpload} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Title *
               </label>
               <input
                 type="text"
-                value={uploadData.title}
-                onChange={(e) => setUploadData({...uploadData, title: e.target.value})}
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 placeholder="Enter note title"
                 required
@@ -71,8 +90,8 @@ const UploadNote = () => {
                 Description
               </label>
               <textarea
-                value={uploadData.description}
-                onChange={(e) => setUploadData({...uploadData, description: e.target.value})}
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                 placeholder="Enter note description"
                 rows="4"
@@ -81,14 +100,15 @@ const UploadNote = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Course ID (Optional)
+                Course Code *
               </label>
               <input
                 type="text"
-                value={uploadData.courseId}
-                onChange={(e) => setUploadData({...uploadData, courseId: e.target.value})}
+                value={formData.courseCode}
+                onChange={(e) => setFormData({...formData, courseCode: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Enter course ID"
+                placeholder="e.g. CS101"
+                required
               />
             </div>
 
@@ -98,7 +118,7 @@ const UploadNote = () => {
               </label>
               <input
                 type="file"
-                onChange={(e) => setUploadData({...uploadData, file: e.target.files[0]})}
+                onChange={(e) => setFormData({...formData, file: e.target.files[0]})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
                 required
@@ -119,9 +139,38 @@ const UploadNote = () => {
               <button
                 type="submit"
                 className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-medium"
+                disabled={loading}
               >
-                <FaUpload className="mr-2" />
-                Upload Note
+                {loading ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      />
+                    </svg>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <FaUpload className="mr-2" />
+                    Upload Note
+                  </>
+                )}
               </button>
             </div>
           </form>

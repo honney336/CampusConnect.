@@ -1,56 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaEdit } from 'react-icons/fa';
-import { getCourseById, updateCourse } from '../../API/API';
+import { getAnnouncementById, updateAnnouncement } from '../../API/API';
 import toast from 'react-hot-toast';
 
-const UpdateCourse = () => {
+const UpdateAnnouncement = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
-    code: '',
-    credit: '',
-    semester: ''
+    content: '',
+    announcementType: 'general',
+    courseId: ''
   });
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    const fetchAnnouncement = async () => {
       try {
-        const response = await getCourseById(id);
+        const response = await getAnnouncementById(id);
         if (response.data.success) {
-          const course = response.data.course;
+          const announcement = response.data.announcement;
           setFormData({
-            title: course.title,
-            description: course.description,
-            code: course.code,
-            credit: course.credit,
-            semester: course.semester
+            title: announcement.title,
+            content: announcement.content,
+            announcementType: announcement.announcementType,
+            courseId: announcement.courseId || ''
           });
         }
       } catch (err) {
-        toast.error('Failed to fetch course details');
-        navigate('/courses');
+        toast.error('Failed to fetch announcement details');
+        navigate('/announcements');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCourse();
+    fetchAnnouncement();
   }, [id, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await updateCourse(id, formData);
+      const response = await updateAnnouncement(id, formData);
       if (response.data.success) {
-        toast.success('Course updated successfully');
-        navigate('/courses');
+        toast.success('Announcement updated successfully');
+        navigate('/announcements');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update course');
+      toast.error(err.response?.data?.message || 'Failed to update announcement');
     }
   };
 
@@ -60,7 +58,7 @@ const UpdateCourse = () => {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="ml-4">Loading course details...</p>
+            <p className="ml-4">Loading announcement details...</p>
           </div>
         </div>
       </div>
@@ -71,97 +69,82 @@ const UpdateCourse = () => {
     <div className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
-          onClick={() => navigate('/courses')}
+          onClick={() => navigate('/announcements')}
           className="flex items-center text-blue-600 hover:text-blue-800 mb-6 font-medium"
         >
           <FaArrowLeft className="mr-2" />
-          Back to Courses
+          Back to Announcements
         </button>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Update Course</h1>
-          <p className="text-gray-600 mb-8">Modify course information and details</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Update Announcement</h1>
+          <p className="text-gray-600 mb-8">Modify announcement information and details</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Course Code *
-              </label>
-              <input
-                type="text"
-                value={formData.code}
-                onChange={(e) => setFormData({...formData, code: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Enter course code"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Course Title *
+                Title *
               </label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Enter course title"
+                placeholder="Enter announcement title"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
+                Content *
               </label>
               <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                value={formData.content}
+                onChange={(e) => setFormData({...formData, content: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                placeholder="Enter course description"
-                rows="4"
+                placeholder="Enter announcement content"
+                rows="6"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Credits *
-              </label>
-              <input
-                type="number"
-                value={formData.credit}
-                onChange={(e) => setFormData({...formData, credit: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Enter credits"
-                required
-                min="1"
-                max="10"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Semester *
+                Type *
               </label>
               <select
-                value={formData.semester}
-                onChange={(e) => setFormData({...formData, semester: e.target.value})}
+                value={formData.announcementType}
+                onChange={(e) => setFormData({...formData, announcementType: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 required
               >
-                <option value="">Select Semester</option>
-                {[1,2,3,4,5,6,7,8].map(num => (
-                  <option key={num} value={num}>Semester {num}</option>
-                ))}
+                <option value="general">General</option>
+                <option value="academic">Academic</option>
+                <option value="exam">Exam</option>
+                <option value="assignment">Assignment</option>
+                <option value="event">Event</option>
+                <option value="urgent">Urgent</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Course ID (Optional)
+              </label>
+              <input
+                type="number"
+                value={formData.courseId}
+                onChange={(e) => setFormData({...formData, courseId: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Enter course ID"
+              />
             </div>
 
             <div className="flex gap-4 pt-6">
               <button
                 type="button"
-                onClick={() => navigate('/courses')}
+                onClick={() => navigate('/announcements')}
                 className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
               >
                 Cancel
@@ -171,7 +154,7 @@ const UpdateCourse = () => {
                 className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
               >
                 <FaEdit className="mr-2" />
-                Update Course
+                Update Announcement
               </button>
             </div>
           </form>
@@ -181,4 +164,4 @@ const UpdateCourse = () => {
   );
 };
 
-export default UpdateCourse;
+export default UpdateAnnouncement;

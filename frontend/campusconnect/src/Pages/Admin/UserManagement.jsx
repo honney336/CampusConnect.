@@ -13,6 +13,7 @@ import {
   FaTimes
 } from 'react-icons/fa';
 import { getAllUsers, createUser, updateUser, deleteUser, getUserById } from '../../API/API';
+import { useNavigate } from 'react-router';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -275,7 +276,7 @@ const UserManagement = () => {
 
         {/* Create User Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="fixed inset-0 bg-white bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Create New User</h3>

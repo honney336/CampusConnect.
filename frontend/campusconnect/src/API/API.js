@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 const ApiFormData = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     withCredentials: true,
@@ -56,7 +57,7 @@ Api.interceptors.response.use(
   }
 );
 
-// Update login endpoint with better error handling
+// Authentication endpoints
 export const login = async (data) => {
   try {
     const response = await Api.post('/api/user/login', data);
@@ -73,94 +74,7 @@ export const login = async (data) => {
 
 export const createuser = (data) => Api.post('/api/auth/register', data);
 
-export const getAllAnnouncements = async () => {
-    try {
-        const response = await Api.get('/api/announcement/all');
-        return response;
-    } catch (error) {
-        console.error('Error fetching announcements:', error);
-        throw error;
-    }
-};
-
-export const getAnnouncementById = async (id) => {
-    try {
-        if (!id || isNaN(id)) {
-            throw new Error('Valid announcement ID is required');
-        }
-        const response = await Api.get(`/api/announcement/${id}`);
-        return response;
-    } catch (error) {
-        console.error('Error fetching announcement:', error);
-        throw error;
-    }
-};
-
-export const createAnnouncement = async (data) => {
-    try {
-        const response = await Api.post('/api/announcement/create', data);
-        return response;
-    } catch (error) {
-        console.error('Error creating announcement:', error);
-        throw error;
-    }
-};
-
-export const changePassword = (data) => Api.post('/api/user/change-password', data, config);
-
-// Event endpoints with fixed routes
-export const getAllEvents = async () => {
-  try {
-    const response = await Api.get('/api/event/all');
-    return response;
-  } catch (error) {
-    console.error('Error fetching events:', error);
-    throw error;
-  }
-};
-
-export const getEventById = async (eventId) => {
-  try {
-    if (!eventId) throw new Error('Event ID is required');
-    const response = await Api.get(`/api/event/${eventId}`); // Updated path
-    return response;
-  } catch (error) {
-    console.error('Error fetching event:', error);
-    throw error;
-  }
-};
-
-export const createEvent = async (data) => {
-  try {
-    const response = await Api.post('/api/event/create', data);
-    return response;
-  } catch (error) {
-    console.error('Error creating event:', error);
-    throw error;
-  }
-};
-
-export const updateEvent = async (id, data) => {
-  try {
-    if (!id) throw new Error('Event ID is required');
-    const response = await Api.put(`/api/event/${id}`, data); // Updated path
-    return response;
-  } catch (error) {
-    console.error('Error updating event:', error);
-    throw error;
-  }
-};
-
-export const deleteEvent = async (id) => {
-  try {
-    if (!id) throw new Error('Event ID is required');
-    const response = await Api.delete(`/api/event/${id}`); // Updated path
-    return response;
-  } catch (error) {
-    console.error('Error deleting event:', error);
-    throw error;
-  }
-};
+export const changePassword = (data) => Api.post('/api/user/change-password', data);
 
 // Course endpoints
 export const getAllCourses = async () => {
@@ -213,69 +127,7 @@ export const deleteCourse = async (id) => {
   }
 };
 
-// Notes endpoints
-export const getAllNotes = async () => {
-  try {
-    const response = await Api.get('/api/notes/all');
-    return response;
-  } catch (error) {
-    console.error('Error fetching notes:', error);
-    throw error;
-  }
-};
-
-export const getCourseNotes = async (courseId) => {
-  try {
-    const response = await Api.get(`/api/notes/course/${courseId}`);
-    return response;
-  } catch (error) {
-    console.error('Error fetching course notes:', error);
-    throw error;
-  }
-};
-
-export const uploadNote = async (formData) => {
-  try {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    
-    const response = await ApiFormData.post('/api/notes/upload', formData, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'X-User-Role': user.role || '',
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    return response;
-  } catch (error) {
-    console.error('Error uploading note:', error.response?.data || error);
-    throw error;
-  }
-};
-
-export const downloadNote = async (noteId) => {
-  try {
-    const response = await Api.get(`/api/notes/download/${noteId}`, {
-      responseType: 'blob'
-    });
-    return response;
-  } catch (error) {
-    console.error('Error downloading note:', error);
-    throw error;
-  }
-};
-
-export const deleteNote = async (noteId) => {
-  try {
-    const response = await Api.delete(`/api/notes/delete/${noteId}`);
-    return response;
-  } catch (error) {
-    console.error('Error deleting note:', error);
-    throw error;
-  }
-};
-
-// Enrollment endpoints - Fixed to match actual backend routes
+// Enrollment endpoints
 export const getAllEnrollments = async () => {
   try {
     const response = await Api.get('/api/enrollment/all-enrollments');
@@ -289,15 +141,11 @@ export const getAllEnrollments = async () => {
 export const getStudentEnrollments = async () => {
   try {
     const response = await Api.get('/api/enrollment/enrollments');
-    
-    // Log the actual response to debug
     console.log('Student enrollments API response:', response.data);
-    
-    // Return the response as-is since it's working
     return response;
   } catch (error) {
     console.error('Error fetching student enrollments:', error);
-    throw error; // Don't mask the error, let it be handled properly
+    throw error;
   }
 };
 
@@ -332,6 +180,39 @@ export const removeEnrollment = async (enrollmentId) => {
 };
 
 // Announcement endpoints
+export const getAllAnnouncements = async () => {
+    try {
+        const response = await Api.get('/api/announcement/all');
+        return response;
+    } catch (error) {
+        console.error('Error fetching announcements:', error);
+        throw error;
+    }
+};
+
+export const getAnnouncementById = async (id) => {
+    try {
+        if (!id || isNaN(id)) {
+            throw new Error('Valid announcement ID is required');
+        }
+        const response = await Api.get(`/api/announcement/${id}`);
+        return response;
+    } catch (error) {
+        console.error('Error fetching announcement:', error);
+        throw error;
+    }
+};
+
+export const createAnnouncement = async (data) => {
+    try {
+        const response = await Api.post('/api/announcement/create', data);
+        return response;
+    } catch (error) {
+        console.error('Error creating announcement:', error);
+        throw error;
+    }
+};
+
 export const getCourseAnnouncements = async (courseId) => {
     try {
         const response = await Api.get(`/api/announcement/course/${courseId}`);
@@ -372,15 +253,126 @@ export const deleteAnnouncement = async (id) => {
     }
 };
 
-// Fix the baseURL - change from frontend port to backend port
-const baseURL = "http://localhost:5000" // Change this to your actual backend port
-
-// Helper function to get token (add this if it's missing)
-const getToken = () => {
-  return localStorage.getItem("token");
+// Event endpoints
+export const getAllEvents = async () => {
+  try {
+    const response = await Api.get('/api/event/all');
+    return response;
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    throw error;
+  }
 };
 
-// Activity Log APIs - Updated to match server routes with hyphens
+export const getEventById = async (eventId) => {
+  try {
+    if (!eventId) throw new Error('Event ID is required');
+    const response = await Api.get(`/api/event/${eventId}`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    throw error;
+  }
+};
+
+export const createEvent = async (data) => {
+  try {
+    const response = await Api.post('/api/event/create', data);
+    return response;
+  } catch (error) {
+    console.error('Error creating event:', error);
+    throw error;
+  }
+};
+
+export const updateEvent = async (id, data) => {
+  try {
+    if (!id) throw new Error('Event ID is required');
+    const response = await Api.put(`/api/event/${id}`, data);
+    return response;
+  } catch (error) {
+    console.error('Error updating event:', error);
+    throw error;
+  }
+};
+
+export const deleteEvent = async (id) => {
+  try {
+    if (!id) throw new Error('Event ID is required');
+    const response = await Api.delete(`/api/event/${id}`);
+    return response;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+};
+
+// Notes endpoints
+export const getAllNotes = async () => {
+  try {
+    const response = await Api.get('/api/notes/all');
+    return response;
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    throw error;
+  }
+};
+
+export const getCourseNotes = async (courseId) => {
+  try {
+    const response = await Api.get(`/api/notes/course/${courseId}`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching course notes:', error);
+    throw error;
+  }
+};
+
+export const uploadNote = async (formData) => {
+  try {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    const response = await ApiFormData.post('/api/notes/upload', formData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'X-User-Role': user.role || '',
+      }
+    });
+    return response;
+  } catch (error) {
+    console.error('Error uploading note:', error.response?.data || error);
+    throw error;
+  }
+};
+
+export const downloadNote = async (noteId) => {
+  try {
+    const response = await Api.get(`/api/notes/download/${noteId}`, {
+      responseType: 'blob'
+    });
+    return response;
+  } catch (error) {
+    console.error('Error downloading note:', error);
+    throw error;
+  }
+};
+
+export const deleteNote = async (noteId) => {
+  try {
+    const response = await Api.delete(`/api/notes/delete/${noteId}`);
+    return response;
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    throw error;
+  }
+};
+
+// Helper function and base URL for legacy functions
+const baseURL = "http://localhost:5000";
+const getToken = () => localStorage.getItem("token");
+
+// Activity Log APIs
 export const getAllActivityLogs = async () => {
   try {
     const token = getToken();
@@ -396,9 +388,6 @@ export const getAllActivityLogs = async () => {
     return response;
   } catch (error) {
     console.error("Error fetching activity logs:", error);
-    if (error.response?.status === 404) {
-      throw new Error("Activity logs endpoint not found. Please check if the backend route is properly configured.");
-    }
     throw error;
   }
 };
@@ -418,83 +407,6 @@ export const getActivityLogStats = async () => {
     return response;
   } catch (error) {
     console.error("Error fetching activity log stats:", error);
-    throw error;
-  }
-};
-
-export const getActivityLogsByEntityType = async (entityType) => {
-  try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-    
-    const response = await axios.get(`${baseURL}/api/activity-log/entity/${entityType}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.error("Error fetching activity logs by entity type:", error);
-    throw error;
-  }
-};
-
-export const getUserActivityLogs = async (userId) => {
-  try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-    
-    const response = await axios.get(`${baseURL}/api/activity-log/user/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.error("Error fetching user activity logs:", error);
-    throw error;
-  }
-};
-
-export const getMyActivityLogs = async () => {
-  try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-    
-    const response = await axios.get(`${baseURL}/api/activity-log/my-logs`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.error("Error fetching my activity logs:", error);
-    throw error;
-  }
-};
-
-export const deleteOldActivityLogs = async (days) => {
-  try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-    
-    const response = await axios.delete(`${baseURL}/api/activity-log/cleanup`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: { days },
-    });
-    return response;
-  } catch (error) {
-    console.error("Error deleting old activity logs:", error);
     throw error;
   }
 };
@@ -594,4 +506,117 @@ export const createUser = async (userData) => {
     throw error;
   }
 };
+    if (!token) {const getAllUsers = async () => {
+      throw new Error("No authentication token found");
+    } getToken();
+    
+    const response = await axios.delete(`${baseURL}/api/activity-log/cleanup`, { throw new Error("No authentication token found");
+      headers: {}
+        Authorization: `Bearer ${token}`,
+      },se = await axios.get(`${baseURL}/api/auth/getuser`, {
+      data: { days },
+    });Authorization: `Bearer ${token}`,
+    return response;,
+  } catch (error) {
+    console.error("Error deleting old activity logs:", error);;
+    throw error;
+  }r("Error fetching users:", error);
+}; throw error;
+}
+// User Management APIs};
+export const getAllUsers = async () => {
+  try {const getUserById = async (userId) => {
+    const token = getToken();
+    if (!token) { getToken();
+      throw new Error("No authentication token found");
+    } throw new Error("No authentication token found");
+    }
+    const response = await axios.get(`${baseURL}/api/auth/getuser`, {
+      headers: {se = await axios.get(`${baseURL}/api/auth/searchuser/${userId}`, {
+        Authorization: `Bearer ${token}`,
+      },Authorization: `Bearer ${token}`,
+    });,
+    return response;
+  } catch (error) {;
+    console.error("Error fetching users:", error);
+    throw error;r("Error fetching user by ID:", error);
+  } throw error;
+};}
+};
+export const getUserById = async (userId) => {
+  try {const updateUser = async (userId, userData) => {
+    const token = getToken();
+    if (!token) { getToken();
+      throw new Error("No authentication token found");
+    } throw new Error("No authentication token found");
+    }
+    const response = await axios.get(`${baseURL}/api/auth/searchuser/${userId}`, {
+      headers: {se = await axios.put(`${baseURL}/api/auth/update/${userId}`, userData, {
+        Authorization: `Bearer ${token}`,
+      },Authorization: `Bearer ${token}`,
+    });,
+    return response;
+  } catch (error) {;
+    console.error("Error fetching user by ID:", error);
+    throw error;r("Error updating user:", error);
+  } throw error;
+};}
+};
+export const updateUser = async (userId, userData) => {
+  try {const deleteUser = async (userId) => {
+    const token = getToken();
+    if (!token) { getToken();
+      throw new Error("No authentication token found");
+    } throw new Error("No authentication token found");
+    }
+    const response = await axios.put(`${baseURL}/api/auth/update/${userId}`, userData, {
+      headers: {se = await axios.delete(`${baseURL}/api/auth/deleteUser/${userId}`, {
+        Authorization: `Bearer ${token}`,
+      },Authorization: `Bearer ${token}`,
+    });,
+    return response;
+  } catch (error) {;
+    console.error("Error updating user:", error);
+    throw error;r("Error deleting user:", error);
+  } throw error;
+};}
+};
+export const deleteUser = async (userId) => {
+  try {const createUser = async (userData) => {
+    const token = getToken();
+    if (!token) { getToken();
+      throw new Error("No authentication token found");
+    } throw new Error("No authentication token found");
+    }
+    const response = await axios.delete(`${baseURL}/api/auth/deleteUser/${userId}`, {
+      headers: {se = await axios.post(`${baseURL}/api/auth/register`, userData, {
+        Authorization: `Bearer ${token}`,
+      },Authorization: `Bearer ${token}`,
+    });,
+    return response;
+  } catch (error) {;
+    console.error("Error deleting user:", error);
+    throw error;r("Error creating user:", error);
+  } throw error;
+};}
+};
+export const createUser = async (userData) => {
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+};  }    throw error;    console.error("Error creating user:", error);  } catch (error) {    return response;    });      },        Authorization: `Bearer ${token}`,      headers: {    const response = await axios.post(`${baseURL}/api/auth/register`, userData, {        }      throw new Error("No authentication token found");    if (!token) {    const token = getToken();  try {

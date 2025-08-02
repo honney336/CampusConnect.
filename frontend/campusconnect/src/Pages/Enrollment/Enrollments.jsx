@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FaBook, 
   FaUser, 
   FaCalendarAlt, 
   FaGraduationCap,
   FaInfoCircle,
-  FaClipboardList
+  FaClipboardList,
+  FaTrash,
+  FaPlus
 } from 'react-icons/fa';
 import { getStudentEnrollments, getAllEnrollments } from '../../API/API';
 
@@ -13,6 +16,13 @@ const Enrollments = () => {
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userRole, setUserRole] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    setUserRole(userData.role || '');
+  }, []);
 
   useEffect(() => {
     fetchEnrollments();
@@ -67,14 +77,26 @@ const Enrollments = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {JSON.parse(localStorage.getItem('user') || '{}').role === 'admin' ? 'All Course Enrollments' : 'My Course Enrollments'}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            {JSON.parse(localStorage.getItem('user') || '{}').role === 'admin' ? 'View and manage all student enrollments' : 'View and manage your enrolled courses'}
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Enrollments</h1>
+              <p className="text-gray-600 mt-1">Manage student course enrollments</p>
+            </div>
+            
+            {(userRole === 'admin' || userRole === 'faculty') && (
+              <button
+                onClick={() => {
+                  console.log('Navigate to enroll-student'); // Debug log
+                  navigate('/enroll-student');
+                }}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 shadow-sm transition-colors"
+              >
+                <FaPlus className="mr-2" />
+                Enroll Student
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Error Message */}

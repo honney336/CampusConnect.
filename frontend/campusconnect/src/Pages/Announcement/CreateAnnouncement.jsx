@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { createAnnouncement } from "../../API/API";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const CreateAnnouncement = () => {
@@ -64,25 +64,33 @@ const CreateAnnouncement = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={() => navigate("/announcements")}
-          className="mb-6 flex items-center text-blue-600 hover:text-blue-800"
+          className="flex items-center text-blue-600 hover:text-blue-800 mb-6 font-medium"
         >
-          <FaArrowLeft className="mr-2" /> Back to Announcements
+          <FaArrowLeft className="mr-2" />
+          Back to Announcements
         </button>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-semibold mb-6">Create Announcement</h2>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Create New Announcement
+          </h1>
+          <p className="text-gray-600 mb-8">
+            Share important information with the campus community
+          </p>
 
           {error && (
-            <div className="mb-4 text-red-600 font-medium">{error}</div>
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="text-red-600">{error}</div>
+            </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Title
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title *
               </label>
               <input
                 type="text"
@@ -91,13 +99,14 @@ const CreateAnnouncement = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Enter announcement title"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Content
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Content *
               </label>
               <textarea
                 required
@@ -106,20 +115,21 @@ const CreateAnnouncement = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, content: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                placeholder="Enter announcement content"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Announcement Type
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Announcement Type *
               </label>
               <select
                 value={formData.announcementType}
                 onChange={(e) =>
                   setFormData({ ...formData, announcementType: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 required
               >
                 {announcementTypes.map((type) => (
@@ -131,7 +141,7 @@ const CreateAnnouncement = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Course Code (Optional)
               </label>
               <input
@@ -140,31 +150,34 @@ const CreateAnnouncement = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, courseCode: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 placeholder="e.g. CS101"
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="text-xs text-gray-500 mt-2">
                 Leave blank for general announcements
               </p>
             </div>
 
-            <div className="flex justify-end space-x-4">
+            <div className="flex gap-4 pt-6">
               <button
                 type="button"
                 onClick={() => navigate("/announcements")}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md flex items-center"
+                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
               >
                 {loading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 ) : (
-                  "Create Announcement"
+                  <>
+                    <FaPlus className="mr-2" />
+                    Create Announcement
+                  </>
                 )}
               </button>
             </div>

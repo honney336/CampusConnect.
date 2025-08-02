@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAnnouncementById } from '../../API/API';
-import { FaUser, FaBook, FaCalendarAlt, FaBullhorn, FaArrowLeft } from 'react-icons/fa';
+import { FaUser, FaBook, FaCalendarAlt, FaBullhorn, FaArrowLeft, FaInfoCircle } from 'react-icons/fa';
 
 const PRIORITY_COLORS = {
   High: 'bg-red-100 text-red-800',
@@ -24,79 +24,89 @@ const AnnouncementDetail = () => {
   }, [id]);
 
   if (!announcement) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="ml-4">Loading announcement...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pt-16 pb-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Animated Back Button */}
+    <div className="min-h-screen bg-gray-50 pt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={() => navigate('/announcements')}
-          className="group mb-8 flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 
-                     bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
+          className="flex items-center text-blue-600 hover:text-blue-800 mb-6 font-medium"
         >
-          <FaArrowLeft className="mr-2 transform group-hover:-translate-x-1 transition-transform duration-300" />
+          <FaArrowLeft className="mr-2" />
           Back to Announcements
         </button>
 
-        {/* Enhanced Announcement Card */}
-        <div className="transform transition-all duration-300 hover:scale-[1.01]">
-          <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
-            {/* Header with enhanced gradient */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
-                    <FaBullhorn className="h-6 w-6 text-white" />
-                  </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center">
+              <FaBullhorn className="w-5 h-5 text-blue-600 mr-2" />
+              <h1 className="text-lg font-semibold text-gray-900">
+                Announcement Details
+              </h1>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="border border-gray-200 rounded-lg p-6">
+              {/* Announcement Header */}
+              <div className="flex items-start mb-4">
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <FaBullhorn className="w-6 h-6 text-blue-600" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl font-bold text-white mb-2">
+                <div className="ml-4 flex-1">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">
                     {announcement.title}
-                  </h1>
+                  </h2>
+                  
                   {announcement.priority && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold 
-                                   bg-white bg-opacity-20 backdrop-blur-sm text-white border border-white/30">
-                      {announcement.priority} Priority
+                    <div className="mb-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${PRIORITY_COLORS[announcement.priority]}`}>
+                        {announcement.priority} Priority
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center text-sm text-gray-600 mb-2">
+                    <FaUser className="w-4 h-4 mr-2" />
+                    <span className="font-medium">Posted by: </span>
+                    <span className="ml-1">
+                      {announcement.creator?.username || 'Unknown'}
                     </span>
+                  </div>
+
+                  {JSON.parse(localStorage.getItem('user') || '{}').role === 'admin' && announcement.creator && (
+                    <div className="bg-blue-50 p-2 rounded-md mt-2">
+                      <p className="text-sm text-blue-800 font-medium">
+                        Creator: {announcement.creator.username}
+                      </p>
+                      <p className="text-xs text-blue-600">
+                        {announcement.creator.email}
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
-            </div>
 
-            {/* Content with enhanced typography */}
-            <div className="px-8 py-8">
-              <div className="prose prose-lg max-w-none">
-                <p className="text-gray-700 leading-relaxed">
-                  {announcement.content}
-                </p>
-              </div>
-            </div>
-
-            {/* Footer with glass effect */}
-            <div className="bg-gray-50 px-8 py-6 backdrop-blur-sm border-t border-gray-100">
-              {announcement.course && (
-                <div className="flex items-center gap-3 mb-4 p-3 bg-white rounded-lg shadow-sm">
-                  <FaBook className="text-blue-600 text-lg" />
-                  <div>
-                    <span className="font-medium text-gray-900">{announcement.course.code}</span>
-                    <span className="mx-2 text-gray-400">•</span>
-                    <span className="text-gray-600">{announcement.course.title}</span>
+              {/* Announcement Details */}
+              <div className="space-y-3 border-t border-gray-200 pt-4">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center text-gray-600">
+                    <FaCalendarAlt className="w-4 h-4 mr-2" />
+                    <span>Posted:</span>
                   </div>
-                </div>
-              )}
-              
-              <div className="flex flex-wrap items-center gap-6 text-sm">
-                <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm">
-                  <FaUser className="mr-2 text-blue-600" />
-                  <span className="text-gray-700">
-                    Posted by: <span className="font-medium">{announcement.creator?.username || 'Unknown'}</span>
-                  </span>
-                </div>
-                <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm">
-                  <FaCalendarAlt className="mr-2 text-blue-600" />
-                  <time className="text-gray-700">
+                  <span className="font-medium text-gray-900">
                     {new Date(announcement.created_At).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -104,7 +114,32 @@ const AnnouncementDetail = () => {
                       hour: '2-digit',
                       minute: '2-digit'
                     })}
-                  </time>
+                  </span>
+                </div>
+
+                {announcement.course && (
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center text-gray-600">
+                      <FaBook className="w-4 h-4 mr-2" />
+                      <span>Course:</span>
+                    </div>
+                    <span className="font-medium text-gray-900">
+                      {announcement.course.code} - {announcement.course.title}
+                    </span>
+                  </div>
+                )}
+
+                {/* Content */}
+                <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                  <div className="flex items-start">
+                    <FaInfoCircle className="w-4 h-4 mr-2 mt-0.5 text-gray-500 flex-shrink-0" />
+                    <div className="text-sm text-gray-700">
+                      <h3 className="font-medium mb-2">Content:</h3>
+                      <p className="leading-relaxed">
+                        {announcement.content}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

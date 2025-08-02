@@ -103,27 +103,29 @@ const getAllEvents = async (req, res) => {
                 {
                     model: User,
                     as: 'creator',
-                    attributes: ['username']
+                    attributes: ['id', 'username', 'email']
                 },
                 {
                     model: Course,
                     as: 'course',
-                    attributes: ['title'],
+                    attributes: ['id', 'title', 'code'],
                     required: false
                 }
             ],
             order: [['eventDate', 'ASC']]
         });
 
-        // Format response
+        // Format response with id included
         const formattedEvents = events.map(event => ({
+            id: event.id, // Include the ID
             title: event.title,
             description: event.description,
             eventType: event.eventType,
             priority: event.priority,
             eventDate: event.eventDate,
-            creator: event.creator.username,
-            ...(event.course && { course: event.course.title })
+            createdBy: event.createdBy, // Include createdBy for permission checks
+            creator: event.creator,
+            ...(event.course && { course: event.course })
         }));
 
         return res.status(200).json({

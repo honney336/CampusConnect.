@@ -7,13 +7,17 @@ import {
   FaBullhorn,
   FaCalendarAlt,
   FaGraduationCap,
-  FaChartBar,
   FaPlus,
   FaEye,
   FaUserCheck,
   FaFileUpload
 } from 'react-icons/fa';
-import { getAllCourses, getAllAnnouncements, getAllEvents } from '../API/API';
+import { 
+  getFacultyCourses, 
+  getFacultyAnnouncements, 
+  getFacultyEvents,
+  getFacultyStats 
+} from './facultyAPI';
 
 const FacultyDashboard = () => {
   const navigate = useNavigate();
@@ -29,99 +33,45 @@ const FacultyDashboard = () => {
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
     setUser(userData);
+    if (userData?.id) {
+      fetchFacultyData();
+    }
   }, []);
 
-  // Separate useEffect for fetching stats after user is set
-  useEffect(() => {
-    if (user?.id) {
-      fetchFacultyStats();
-    }
-  }, [user]);
-
-  const fetchFacultyStats = async () => {
+  const fetchFacultyData = async () => {
     try {
       setLoading(true);
       
-      console.log('Current user:', user); // Debug log
+      // Use proper faculty-specific API endpoints
+      const statsData = await getFacultyStats();
       
-      // Fetch all courses
-      const coursesRes = await getAllCourses();
-      const allCourses = coursesRes?.data?.courses || [];
-      console.log('API Response for courses:', coursesRes?.data);
-      console.log('All courses raw data:', allCourses);
-      
-      // More comprehensive filtering for courses
-      const facultyCourses = allCourses.filter(course => {
-        console.log('Course data:', course);
-        console.log('Course faculty:', course.faculty);
-        console.log('Course facultyId:', course.facultyId);
+      if (statsData?.data?.success) {
+        setStats(statsData.data.stats);
+      } else {
+        // Fallback to individual API calls if stats endpoint doesn't exist
+        const [coursesRes, announcementsRes, eventsRes] = await Promise.all([
+          getFacultyCourses(),
+          getFacultyAnnouncements(),
+          getFacultyEvents()
+        ]);
+
+        const courses = coursesRes?.data?.courses || [];
+        const announcements = announcementsRes?.data?.announcements || [];
+        const events = eventsRes?.data?.events || [];
         
-        const match = 
-          course.faculty?.id === user?.id || 
-          course.facultyId === user?.id ||
-          course.faculty?.username === user?.username ||
-          String(course.faculty?.id) === String(user?.id) ||
-          String(course.facultyId) === String(user?.id);
-          
-        console.log(`Course ${course.title}: match=${match}`);
-        return match;
-      });
-      
-      console.log('Faculty courses found:', facultyCourses);
-      
-      // Fetch all announcements
-      const announcementsRes = await getAllAnnouncements();
-      const allAnnouncements = announcementsRes?.data?.announcements || [];
-      console.log('API Response for announcements:', announcementsRes?.data);
-      
-      const facultyAnnouncements = allAnnouncements.filter(announcement => {
-        const match = 
-          announcement.createdBy === user?.id || 
-          announcement.creator?.id === user?.id ||
-          String(announcement.createdBy) === String(user?.id) ||
-          String(announcement.creator?.id) === String(user?.id);
-          
-        return match;
-      });
-      
-      console.log('Faculty announcements found:', facultyAnnouncements);
-      
-      // Fetch all events
-      const eventsRes = await getAllEvents();
-      const allEvents = eventsRes?.data?.events || [];
-      console.log('API Response for events:', eventsRes?.data);
-      
-      const facultyEvents = allEvents.filter(event => {
-        const match = 
-          event.createdBy === user?.id || 
-          event.creator?.id === user?.id ||
-          String(event.createdBy) === String(user?.id) ||
-          String(event.creator?.id) === String(user?.id);
-          
-        return match;
-      });
-      
-      console.log('Faculty events found:', facultyEvents);
-      
-      // Calculate total students from course enrollments
-      const totalStudents = facultyCourses.reduce((total, course) => {
-        const enrollmentCount = course.enrollments?.length || 0;
-        console.log(`Course ${course.title} has ${enrollmentCount} enrollments`);
-        return total + enrollmentCount;
-      }, 0);
+        const totalStudents = courses.reduce((total, course) => {
+          return total + (course.enrollments?.length || 0);
+        }, 0);
 
-      const newStats = {
-        courses: facultyCourses.length,
-        announcements: facultyAnnouncements.length,
-        events: facultyEvents.length,
-        totalStudents
-      };
-
-      console.log('Final calculated stats:', newStats);
-      setStats(newStats);
-      
+        setStats({
+          courses: courses.length,
+          announcements: announcements.length,
+          events: events.length,
+          totalStudents
+        });
+      }
     } catch (error) {
-      console.error('Error fetching faculty stats:', error);
+      console.error('Error fetching faculty data:', error);
       setStats({
         courses: 0,
         announcements: 0,
@@ -184,7 +134,7 @@ const FacultyDashboard = () => {
       count: stats.courses,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      action: () => navigate('/courses')
+      action: () => navigate('/faculty/courses')
     },
     {
       title: 'Student Enrollments',
@@ -211,7 +161,7 @@ const FacultyDashboard = () => {
       count: stats.announcements,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      action: () => navigate('/announcements')
+      action: () => navigate('/faculty/announcements')
     },
     {
       title: 'My Events',
@@ -220,7 +170,7 @@ const FacultyDashboard = () => {
       count: stats.events,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
-      action: () => navigate('/events')
+      action: () => navigate('/faculty/events')
     }
   ];
 
