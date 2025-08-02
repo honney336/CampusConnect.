@@ -10,7 +10,8 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  LayoutDashboard
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -20,6 +21,20 @@ const Navbar = () => {
   const authenticated = isAuthenticated();
   const userRole = getUserRole();
   const username = getUsername();
+
+  // Get user's dashboard route based on role
+  const getDashboardRoute = () => {
+    switch (userRole) {
+      case 'admin':
+        return '/admindashboard';
+      case 'faculty':
+        return '/facultydashboard';
+      case 'student':
+        return '/studentdashboard';
+      default:
+        return '/dashboard';
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -54,13 +69,14 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           {authenticated && (
             <div className="hidden md:flex items-center space-x-4">
+              <NavLink to={getDashboardRoute()} icon={LayoutDashboard}>Dashboard</NavLink>
               <NavLink to="/courses" icon={BookOpen}>Courses</NavLink>
               <NavLink to="/notes" icon={FileText}>Notes</NavLink>
               <NavLink to="/events" icon={Calendar}>Events</NavLink>
               <NavLink to="/announcements" icon={Megaphone}>Announcements</NavLink>
               
               {userRole === 'admin' && (
-                <NavLink to="/admin" icon={Settings}>Admin Dashboard</NavLink>
+                <NavLink to="/admin" icon={Settings}>Admin Panel</NavLink>
               )}
               
               <NavLink to="/profile" icon={User}>Profile</NavLink>
@@ -111,6 +127,9 @@ const Navbar = () => {
         {authenticated && isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-2">
+              <NavLink to={getDashboardRoute()} icon={LayoutDashboard} onClick={() => setIsMobileMenuOpen(false)}>
+                Dashboard
+              </NavLink>
               <NavLink to="/courses" icon={BookOpen} onClick={() => setIsMobileMenuOpen(false)}>
                 Courses
               </NavLink>
@@ -126,7 +145,7 @@ const Navbar = () => {
               
               {userRole === 'admin' && (
                 <NavLink to="/admin" icon={Settings} onClick={() => setIsMobileMenuOpen(false)}>
-                  Admin Dashboard
+                  Admin Panel
                 </NavLink>
               )}
               

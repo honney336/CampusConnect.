@@ -15,14 +15,37 @@ import {
 import { getAllAnnouncements, deleteAnnouncement } from "../../API/API";
 import toast from 'react-hot-toast';
 
-// Safely extract role from localStorage
-let userRole = "";
-try {
-  const user = JSON.parse(localStorage.getItem("user"));
-  userRole = user?.role || "";
-} catch (error) {
-  console.error("Error parsing user from localStorage:", error);
-}
+// Safe localStorage utility functions
+const safeLocalStorage = {
+  getItem: (key) => {
+    try {
+      if (typeof Storage === "undefined" || typeof localStorage === "undefined") {
+        return null;
+      }
+      return localStorage.getItem(key);
+    } catch (error) {
+      console.error(`Error reading from localStorage (${key}):`, error);
+      return null;
+    }
+  },
+
+  getUser: () => {
+    try {
+      const userData = safeLocalStorage.getItem('user');
+      if (!userData) return null;
+      
+      const user = JSON.parse(userData);
+      if (!user || typeof user !== 'object') {
+        return null;
+      }
+      
+      return user;
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      return null;
+    }
+  }
+};
 
 const PRIORITY_COLORS = {
   High: "bg-rose-50 text-rose-600",
@@ -52,27 +75,54 @@ const Announcements = () => {
   const [userRole, setUserRole] = useState('');
   const navigate = useNavigate();
 
+  // Initialize user data safely
+  useEffect(() => {
+    try {
+      const token = safeLocalStorage.getItem('token');
+      const userData = safeLocalStorage.getUser();
+      
+      if (!token) {
+        console.log("No authentication token found, redirecting to login");
+        navigate("/login");
+        return;
+      }
+
+      if (userData) {
+        setUser(userData);
+        setUserRole(userData.role || '');
+        console.log('User initialized successfully:', userData);
+      } else {
+        console.log("No valid user data found");
+        setUser({});
+        setUserRole('');
+      }
+
+    } catch (error) {
+      console.error('Error initializing user:', error);
+      setUser({});
+      setUserRole('');
+    }
+  }, [navigate]);
+
   // Fetch announcements
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("No authentication token found");
-      navigate("/login");
-      return;
-    }
-
     const fetchData = async () => {
       try {
+        const token = safeLocalStorage.getItem("token");
+        if (!token) {
+          setError("No authentication token found");
+          navigate("/login");
+          return;
+        }
+
         setLoading(true);
         setError(null);
 
-        // Add request debugging
         console.log("Fetching announcements with token:", token);
         
         const res = await getAllAnnouncements();
-        console.log("API Response:", res); // Debug response
+        console.log("API Response:", res);
 
-        // Validate response structure
         if (!res) {
           throw new Error("No response from server");
         }
@@ -107,7 +157,12 @@ const Announcements = () => {
         
         // Handle specific error cases
         if (err.response?.status === 401) {
-          localStorage.removeItem("token");
+          try {
+            safeLocalStorage.getItem('token') && localStorage.removeItem("token");
+            safeLocalStorage.getItem('user') && localStorage.removeItem("user");
+          } catch (clearError) {
+            console.error("Error clearing localStorage:", clearError);
+          }
           navigate("/login");
           return;
         }
@@ -120,15 +175,11 @@ const Announcements = () => {
       }
     };
 
-    fetchData();
-  }, [navigate, retrying]);
-
-  // Initialize user data
-  useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    setUser(userData);
-    setUserRole(userData.role || '');
-  }, []);
+    // Only fetch if we have attempted to initialize user
+    if (user !== null) {
+      fetchData();
+    }
+  }, [navigate, retrying, user]);
 
   // Unique course filter options
   const courses = useMemo(() => {
@@ -340,16 +391,24 @@ const Announcements = () => {
                             </span>
                           </div>
 
-                          {JSON.parse(localStorage.getItem('user') || '{}').role === 'admin' && announcement.creator && (
-                            <div className="bg-blue-50 p-2 rounded-md mt-2">
-                              <p className="text-sm text-blue-800 font-medium">
-                                Creator: {announcement.creator.username}
-                              </p>
-                              <p className="text-xs text-blue-600">
-                                {announcement.creator.email}
-                              </p>
-                            </div>
-                          )}
+                          {(() => {
+                            try {
+                              const currentUser = safeLocalStorage.getUser();
+                              return currentUser?.role === 'admin' && announcement.creator && (
+                                <div className="bg-blue-50 p-2 rounded-md mt-2">
+                                  <p className="text-sm text-blue-800 font-medium">
+                                    Creator: {announcement.creator.username}
+                                  </p>
+                                  <p className="text-xs text-blue-600">
+                                    {announcement.creator.email}
+                                  </p>
+                                </div>
+                              );
+                            } catch (error) {
+                              console.error('Error checking user role:', error);
+                              return null;
+                            }
+                          })()}
                         </div>
                       </div>
 

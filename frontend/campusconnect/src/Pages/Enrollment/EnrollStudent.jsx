@@ -39,9 +39,11 @@ const EnrollStudent = () => {
       console.error('Enrollment error response:', error.response?.data);
       
       if (error.response?.status === 404) {
-        toast.error('Enrollment endpoint not found. Please check your backend routes.');
-      } else if (error.response?.data?.message === "Only access to admin") {
-        toast.error('Faculty access to enrollment is restricted. Please contact admin.');
+        toast.error('Enrollment endpoint not found. Check if backend route "/api/enrollment/enroll" exists.');
+      } else if (error.response?.data?.message?.includes("Only access to admin")) {
+        toast.error('Faculty members should be able to enroll students in their own courses. Please check backend middleware - it should allow faculty access, not just admin.');
+      } else if (error.response?.data?.message?.includes("not found")) {
+        toast.error('Course not found or you do not have permission to enroll students in this course.');
       } else {
         toast.error(error.response?.data?.message || 'Failed to enroll student');
       }

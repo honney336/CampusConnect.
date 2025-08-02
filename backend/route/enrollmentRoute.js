@@ -7,7 +7,7 @@ const isFacultyOrAdmin= require("../middleware/isFacutlyorAdmin");
 
 router.get("/enrollments", authGuard, getStudentEnrollments);
 router.get("/all-enrollments", authGuard, isAdmin, getAllEnrollments);
-router.post("/enroll", authGuard, isAdmin, enrollStudent);
+router.post("/enroll", authGuard, isFacultyOrAdmin, enrollStudent);
 router.get("/course-enrollments/:courseId", authGuard, isFacultyOrAdmin, getCourseEnrollments);
 router.delete("/remove-enrollment/:id", authGuard, isAdmin, removeEnrollment);
 

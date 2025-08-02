@@ -16,18 +16,41 @@ const Api = axios.create({
     },
 });
 
-// Update the Api configuration
+// Helper function and base URL
+const baseURL = "http://localhost:5000";
+const getToken = () => localStorage.getItem("token");
+
+// Update the Api configuration with better error handling
 Api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    let user = null;
+    
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        user = JSON.parse(userData);
+        // Validate user data
+        if (!user || typeof user !== 'object') {
+          throw new Error('Invalid user data');
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing user data in interceptor:', error);
+      // Clear corrupted data
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Redirect to login
+      window.location.href = '/login';
+      return Promise.reject(new Error('Invalid user data'));
+    }
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
     // Add user role to headers for backend role verification
-    if (user.role) {
+    if (user && user.role) {
       config.headers['X-User-Role'] = user.role;
     }
 
@@ -49,6 +72,7 @@ Api.interceptors.response.use(
     });
     
     if (error.response?.status === 401) {
+      // Clear all auth data on 401
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -368,10 +392,6 @@ export const deleteNote = async (noteId) => {
   }
 };
 
-// Helper function and base URL for legacy functions
-const baseURL = "http://localhost:5000";
-const getToken = () => localStorage.getItem("token");
-
 // Activity Log APIs
 export const getAllActivityLogs = async () => {
   try {
@@ -407,6 +427,83 @@ export const getActivityLogStats = async () => {
     return response;
   } catch (error) {
     console.error("Error fetching activity log stats:", error);
+    throw error;
+  }
+};
+
+export const deleteOldActivityLogs = async (days) => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    
+    const response = await axios.delete(`${baseURL}/api/activity-log/cleanup`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: { days },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error deleting old activity logs:", error);
+    throw error;
+  }
+};
+
+export const getActivityLogsByEntityType = async (entityType) => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    
+    const response = await axios.get(`${baseURL}/api/activity-log/entity/${entityType}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error fetching activity logs by entity type:", error);
+    throw error;
+  }
+};
+
+export const getUserActivityLogs = async (userId) => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    
+    const response = await axios.get(`${baseURL}/api/activity-log/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error fetching user activity logs:", error);
+    throw error;
+  }
+};
+
+export const getMyActivityLogs = async () => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    
+    const response = await axios.get(`${baseURL}/api/activity-log/my-logs`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error fetching my activity logs:", error);
     throw error;
   }
 };
@@ -506,117 +603,3 @@ export const createUser = async (userData) => {
     throw error;
   }
 };
-    if (!token) {const getAllUsers = async () => {
-      throw new Error("No authentication token found");
-    } getToken();
-    
-    const response = await axios.delete(`${baseURL}/api/activity-log/cleanup`, { throw new Error("No authentication token found");
-      headers: {}
-        Authorization: `Bearer ${token}`,
-      },se = await axios.get(`${baseURL}/api/auth/getuser`, {
-      data: { days },
-    });Authorization: `Bearer ${token}`,
-    return response;,
-  } catch (error) {
-    console.error("Error deleting old activity logs:", error);;
-    throw error;
-  }r("Error fetching users:", error);
-}; throw error;
-}
-// User Management APIs};
-export const getAllUsers = async () => {
-  try {const getUserById = async (userId) => {
-    const token = getToken();
-    if (!token) { getToken();
-      throw new Error("No authentication token found");
-    } throw new Error("No authentication token found");
-    }
-    const response = await axios.get(`${baseURL}/api/auth/getuser`, {
-      headers: {se = await axios.get(`${baseURL}/api/auth/searchuser/${userId}`, {
-        Authorization: `Bearer ${token}`,
-      },Authorization: `Bearer ${token}`,
-    });,
-    return response;
-  } catch (error) {;
-    console.error("Error fetching users:", error);
-    throw error;r("Error fetching user by ID:", error);
-  } throw error;
-};}
-};
-export const getUserById = async (userId) => {
-  try {const updateUser = async (userId, userData) => {
-    const token = getToken();
-    if (!token) { getToken();
-      throw new Error("No authentication token found");
-    } throw new Error("No authentication token found");
-    }
-    const response = await axios.get(`${baseURL}/api/auth/searchuser/${userId}`, {
-      headers: {se = await axios.put(`${baseURL}/api/auth/update/${userId}`, userData, {
-        Authorization: `Bearer ${token}`,
-      },Authorization: `Bearer ${token}`,
-    });,
-    return response;
-  } catch (error) {;
-    console.error("Error fetching user by ID:", error);
-    throw error;r("Error updating user:", error);
-  } throw error;
-};}
-};
-export const updateUser = async (userId, userData) => {
-  try {const deleteUser = async (userId) => {
-    const token = getToken();
-    if (!token) { getToken();
-      throw new Error("No authentication token found");
-    } throw new Error("No authentication token found");
-    }
-    const response = await axios.put(`${baseURL}/api/auth/update/${userId}`, userData, {
-      headers: {se = await axios.delete(`${baseURL}/api/auth/deleteUser/${userId}`, {
-        Authorization: `Bearer ${token}`,
-      },Authorization: `Bearer ${token}`,
-    });,
-    return response;
-  } catch (error) {;
-    console.error("Error updating user:", error);
-    throw error;r("Error deleting user:", error);
-  } throw error;
-};}
-};
-export const deleteUser = async (userId) => {
-  try {const createUser = async (userData) => {
-    const token = getToken();
-    if (!token) { getToken();
-      throw new Error("No authentication token found");
-    } throw new Error("No authentication token found");
-    }
-    const response = await axios.delete(`${baseURL}/api/auth/deleteUser/${userId}`, {
-      headers: {se = await axios.post(`${baseURL}/api/auth/register`, userData, {
-        Authorization: `Bearer ${token}`,
-      },Authorization: `Bearer ${token}`,
-    });,
-    return response;
-  } catch (error) {;
-    console.error("Error deleting user:", error);
-    throw error;r("Error creating user:", error);
-  } throw error;
-};}
-};
-export const createUser = async (userData) => {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-};  }    throw error;    console.error("Error creating user:", error);  } catch (error) {    return response;    });      },        Authorization: `Bearer ${token}`,      headers: {    const response = await axios.post(`${baseURL}/api/auth/register`, userData, {        }      throw new Error("No authentication token found");    if (!token) {    const token = getToken();  try {
