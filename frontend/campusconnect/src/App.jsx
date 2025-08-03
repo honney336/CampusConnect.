@@ -14,7 +14,7 @@ import Events from './Pages/Events/Events'
 import Enrollments from './Pages/Enrollment/Enrollments';
 import Notes from './Pages/Notes/Notes';
 import CreateAnnouncement from './Pages/Announcement/CreateAnnouncement'
-import AnnouncementDetail from './Pages/Announcement/AnnouncementDetails';
+import AnnouncementDetail from './Pages/Announcement/AnnouncementDetail';
 import CreateEvent from './Pages/Events/CreateEvent';
 import UpdateEvent from './Pages/Events/UpdateEvent';
 import CreateCourse from './Pages/Course/CreateCourse';
@@ -27,6 +27,9 @@ import UserManagement from './Pages/Admin/UserManagement'
 import AdminProfile from './Pages/Admin/AdminProfile'
 import StudentDashboard from './Pages/Student/StudentDashboard'
 import UpdateAnnouncement from './Pages/Announcement/UpdateAnnouncement';
+import StudentProfile from './Pages/Student/StudentProfile';
+import FacultyDashboard from './Pages/Faculty/FacultyDashboard'
+import FacultyProfile from './Pages/Faculty/FacultyProfile'
 
 const ProtectedRoute = ({ element: Element, allowedRoles }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -39,10 +42,10 @@ const ProtectedRoute = ({ element: Element, allowedRoles }) => {
 };
 
 function App() {
-
-     const user = JSON.parse(localStorage.getItem("user") || '{}');
+  const user = JSON.parse(localStorage.getItem("user") || '{}');
   const userRole = user.role || null;
-    return (
+  
+  return (
     <Router>
       <Toaster/>
       <Navbar/>
@@ -101,7 +104,12 @@ function App() {
             allowedRoles={['student']} 
           />
         } />
-        <Route path='/facultydashboard' element={<Faculty/>} />
+        <Route path='/facultydashboard' element={
+          <ProtectedRoute 
+            element={<FacultyDashboard />} 
+            allowedRoles={['faculty']} 
+          />
+        } />
         <Route path="/create-announcement" element={
           <ProtectedRoute 
             element={<CreateAnnouncement />} 
@@ -126,10 +134,28 @@ function App() {
             allowedRoles={['admin']} 
           />
         } />
+        <Route path="/student-profile" element={
+          <ProtectedRoute 
+            element={<StudentProfile />} 
+            allowedRoles={['student']} 
+          />
+        } />
         <Route path="/update-announcement/:id" element={<UpdateAnnouncement />} />
+        <Route path="/faculty-dashboard" element={
+          <ProtectedRoute 
+            element={<FacultyDashboard />} 
+            allowedRoles={['faculty']} 
+          />
+        } />
+        <Route path="/faculty-profile" element={
+          <ProtectedRoute 
+            element={<FacultyProfile />} 
+            allowedRoles={['faculty']} 
+          />
+        } />
       </Routes>
     </Router>
-    )
-  }
+  )
+}
 
 export default App

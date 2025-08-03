@@ -37,19 +37,12 @@ import { jwtDecode } from "jwt-decode";
 import {
   FaHome, FaBullhorn, FaCalendarAlt, FaBook, FaStickyNote,
   FaUserGraduate, FaSignInAlt, FaSignOutAlt, FaUserPlus, FaTimes,
-  FaUser, FaCog
+  FaUser, FaCog, FaTachometerAlt
 } from "react-icons/fa";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
-    setOpen(false);
-  };
 
   // Get user data with debugging
   const token = localStorage.getItem('token');
@@ -85,6 +78,28 @@ const Navbar = () => {
   }
 
   const role = user?.role;
+
+  // Get user's dashboard route based on role
+  const getDashboardRoute = () => {
+    switch (role) {
+      case 'admin':
+        return '/admindashboard';
+      case 'faculty':
+        return '/facultydashboard';
+      case 'student':
+        return '/studentdashboard';
+      default:
+        return '/dashboard';
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    // Force a complete page refresh to clear all component state
+    window.location.href = "/login";
+    setOpen(false);
+  };
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md px-6" style={{ height: '60px' }}>
@@ -127,7 +142,7 @@ const Navbar = () => {
             <div className="flex items-center justify-between flex-1">
               {/* Navigation Links */}
               <div className="flex space-x-8 ml-8">
-                <Link to="/" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaHome /> Home</Link>
+                <Link to={getDashboardRoute()} className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaTachometerAlt /> Dashboard</Link>
                 <Link to="/announcements" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaBullhorn /> Announcements</Link>
                 <Link to="/events" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaCalendarAlt /> Events</Link>
                 <Link to="/courses" className="flex items-center gap-2 text-gray-800 hover:text-blue-600"><FaBook /> Courses</Link>
@@ -148,12 +163,20 @@ const Navbar = () => {
                   </span>
                 </div>
                 
-                {/* Profile Button (only for admin) */}
-                {user?.role === 'admin' && (
+                {/* Profile Button (for admin, student, and faculty) */}
+                {(user?.role === 'admin' || user?.role === 'student' || user?.role === 'faculty') && (
                   <button
-                    onClick={() => navigate('/admin-profile')}
+                    onClick={() => {
+                      if (user.role === 'admin') {
+                        navigate('/admin-profile');
+                      } else if (user.role === 'student') {
+                        navigate('/student-profile');
+                      } else if (user.role === 'faculty') {
+                        navigate('/faculty-profile');
+                      }
+                    }}
                     className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                    title="Admin Profile"
+                    title={`${user.role === 'admin' ? 'Admin' : user.role === 'student' ? 'Student' : 'Faculty'} Profile`}
                   >
                     <FaCog className="w-5 h-5" />
                   </button>
@@ -217,17 +240,29 @@ const Navbar = () => {
                 </div>
               )}
               
-              <Link to="/" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaHome /> Home</Link>
+              <Link to={getDashboardRoute()} className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaTachometerAlt /> Dashboard</Link>
               <Link to="/announcements" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaBullhorn /> Announcements</Link>
               <Link to="/events" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaCalendarAlt /> Events</Link>
               <Link to="/courses" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaBook /> Courses</Link>
               <Link to="/notes" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaStickyNote /> Notes</Link>
               <Link to="/enrollments" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}><FaUserGraduate /> Enrollments</Link>
               
-              {/* Admin Profile in Mobile */}
+              {/* Admin, Student and Faculty Profile in Mobile */}
               {user?.role === 'admin' && (
                 <Link to="/admin-profile" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}>
                   <FaCog /> Admin Profile
+                </Link>
+              )}
+              
+              {user?.role === 'student' && (
+                <Link to="/student-profile" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}>
+                  <FaCog /> Student Profile
+                </Link>
+              )}
+
+              {user?.role === 'faculty' && (
+                <Link to="/faculty-profile" className="flex items-center gap-2 text-gray-800 hover:text-blue-600" onClick={() => setOpen(false)}>
+                  <FaCog /> Faculty Profile
                 </Link>
               )}
               
