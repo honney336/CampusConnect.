@@ -30,7 +30,7 @@ const ActivityLogs = () => {
   const [showStats, setShowStats] = useState(false);
 
   const entityTypes = ['All', 'user', 'course', 'enrollment', 'notes', 'event', 'announcement'];
-  const actionTypes = ['All', 'login', 'login_failed', 'CREATE', 'UPDATE', 'DELETE', 'LOGOUT', 'VIEW'];
+  const actionTypes = ['All', 'login', 'login_failed',  'password_changed', 'profile_updated', 'created', 'deleted', 'uploaded'];
 
   useEffect(() => {
     fetchLogs();
@@ -82,7 +82,7 @@ const ActivityLogs = () => {
       }
     } catch (err) {
       console.error('Error fetching stats:', err);
-      // Don't show error for stats, it's optional
+      
     }
   };
 
@@ -151,7 +151,11 @@ const ActivityLogs = () => {
       login: 'bg-purple-100 text-purple-800',
       login_failed: 'bg-red-100 text-red-800',
       LOGOUT: 'bg-gray-100 text-gray-800',
-      VIEW: 'bg-yellow-100 text-yellow-800'
+      password_changed: 'bg-yellow-100 text-yellow-800',
+      profile_updated: 'bg-blue-100 text-blue-800',
+      created: 'bg-green-100 text-green-800',
+      deleted: 'bg-red-100 text-red-800',
+      uploaded: 'bg-purple-100 text-purple-800'
     };
     return colors[action] || 'bg-gray-100 text-gray-800';
   };
@@ -271,6 +275,7 @@ const ActivityLogs = () => {
                 <option key={type} value={type}>{type}</option>
               ))}
             </select>
+            
             <select
               className="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               value={actionFilter}

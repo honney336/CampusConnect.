@@ -1,36 +1,3 @@
-// import React from 'react'
-// import { Link } from 'react-router';
-
-// const Navbar = () => {
-// //   return (
-// //     <div className='flex items-center justify-between p-2  bg-gray-200 text-white'>
-// //         <Link className="bg-blue-500 rounded-4xl pr-4 pl-4 p-2 m-2 text-white" to={"/"}>Homepage</Link>
-// //         <Link className="bg-blue-500 rounded-4xl pr-4 pl-4 p-2 m-2 text-white" to={"/login"}>Login</Link>
-// //         <Link className="bg-blue-500 rounded-4xl pr-4 pl-4 p-2 m-2 text-white" to={"/register"}>Register</Link>
-// //     </div>
-// //   )
-// // }
-//  return (
-//     <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md flex justify-between items-center p-4 md:px-8 md:py-4">
-//       <Link className="hover:text-blue-500 px-4 py-2 text-gray-800" to="/">
-//         Homepage
-//       </Link>
-//       <Link className="hover:bg-blue-700 rounded-2xl px-4 py-2 text-white" to="/login">
-//         Login
-//       </Link>
-//       <Link className="bg-blue-600 hover:bg-blue-700 rounded-2xl px-4 py-2 text-white" to="/register">
-//         Register
-//         </Link>
-//       <Link className='bg-blue-600 hover:bg-blue-700 rounded-2xl px-4 py-2 text-white' to="/addproduct">
-//         Add Product
-//       </Link>
-     
-//     </div>
-//   );
-// };
-
-// export default Navbar;import React, { useState } from "react";
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";

@@ -16,7 +16,8 @@ import {
 } from 'react-icons/fa';
 import { 
   getFacultyCourses, 
-  getFacultyAnnouncements, 
+  getAllAnnouncements, 
+  
   getFacultyEvents,
   getFacultyStats,
   getFacultyEnrollments,
@@ -59,7 +60,7 @@ const fetchFacultyData = async (userData) => {
     // Use Promise.allSettled to handle partial failures gracefully
     const results = await Promise.allSettled([
       getFacultyCourses(),
-      getFacultyAnnouncements(),
+      getAllAnnouncements(),
       getFacultyEvents(),
       getFacultyEnrollments(),
       getFacultyNotes()
@@ -266,7 +267,7 @@ const fetchFacultyData = async (userData) => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Faculty Dashboard</h1>
           <p className="text-gray-600 mt-1">
-            Welcome back, {user?.username}! Manage your courses and engage with students.
+            Welcome back, <strong>{user?.username}!</strong> Manage your courses and engage with students.
           </p>
         </div>
 

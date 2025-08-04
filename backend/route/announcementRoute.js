@@ -1,16 +1,6 @@
 const router = require("express").Router(); 
 const {createAnnouncement,getAllAnnouncements,getCourseAnnouncements,getMyAnnouncements,getAnnouncementById,updateAnnouncement,deleteAnnouncement} =require("../controller/announcementController");
 
-// const router = require("express").Router();
-// const {
-//     createAnnouncement,
-//     getAllAnnouncements,
-//     getCourseAnnouncements,
-//     getMyAnnouncements,
-//     getAnnouncementById,
-//     updateAnnouncement,
-//     deleteAnnouncement
-// } = require("../controller/announcementController");
 const authGuard = require("../middleware/authGuard");
 const isFacultyorAdmin = require("../middleware/isFacutlyorAdmin");
 

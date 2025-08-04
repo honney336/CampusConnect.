@@ -69,7 +69,7 @@ export const getFacultyCourses = async () => {
 };
 
 // Faculty Announcements API with multiple endpoint attempts
-export const getFacultyAnnouncements = async () => {
+export const getAllAnnouncements = async () => {
   const user = getCurrentUser();
   console.log('🔍 Fetching faculty announcements for user:', user.id);
   
